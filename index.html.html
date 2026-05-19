@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPDC Question Bank</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0f14;--sur:#161a23;--sur2:#1e2330;--bdr:#2a3045;--acc:#4f8ef7;--acc2:#a259ff;--grn:#22c98a;--red:#ff5c5c;--ylw:#ffc94a;--txt:#e8ecf4;--mut:#7a8499;--card:#1a1f2e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(79,142,247,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(79,142,247,0.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+.screen{position:relative;z-index:1;display:none}
+.screen.active{display:block}
+
+/* LOGIN SCREEN */
+#login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+#login.active{display:flex}
+.login-box{background:var(--card);border:1px solid var(--bdr);border-radius:20px;padding:40px 36px;max-width:420px;width:100%;text-align:center}
+.login-logo{width:56px;height:56px;background:linear-gradient(135deg,var(--acc),var(--acc2));border-radius:16px;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;font-size:24px}
+.login-box h2{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:6px}
+.login-box p{color:var(--mut);font-size:13px;margin-bottom:28px;line-height:1.6}
+.input-wrap{position:relative;margin-bottom:14px}
+.input-wrap input{width:100%;background:var(--sur);border:1.5px solid var(--bdr);border-radius:12px;padding:13px 16px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;transition:border-color .2s}
+.input-wrap input::placeholder{color:var(--mut)}
+.input-wrap input:focus{border-color:var(--acc)}
+.login-btn{width:100%;background:linear-gradient(135deg,var(--acc),var(--acc2));color:white;border:none;border-radius:12px;padding:14px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;cursor:pointer;transition:opacity .15s;margin-top:4px}
+.login-btn:hover{opacity:0.9}
+.login-err{color:var(--red);font-size:12px;margin-top:8px;display:none}
+
+/* HOME */
+.hero{text-align:center;padding:50px 20px 32px}
+.badge{display:inline-block;background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.3);color:var(--acc);font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:16px}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,5vw,3rem);font-weight:800;line-height:1.1;margin-bottom:10px;background:linear-gradient(135deg,#e8ecf4 30%,#4f8ef7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{color:var(--mut);font-size:14px;max-width:440px;margin:0 auto 10px;line-height:1.7}
+.user-bar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:28px}
+.user-chip{background:rgba(79,142,247,0.1);border:1px solid rgba(79,142,247,0.25);border-radius:20px;padding:5px 14px;font-size:12px;color:var(--acc);font-weight:600}
+.logout-btn{background:none;border:1px solid var(--bdr);border-radius:20px;padding:5px 12px;font-size:11px;color:var(--mut);cursor:pointer;font-family:'DM Sans',sans-serif;transition:border-color .15s}
+.logout-btn:hover{border-color:var(--red);color:var(--red)}
+.sec-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--mut);text-align:center;margin-bottom:20px}
+
+/* MY SCORES */
+.score-strip{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:36px;padding:0 20px}
+.chip{background:var(--sur);border:1px solid var(--bdr);border-radius:10px;padding:10px 16px;font-size:13px;display:flex;align-items:center;gap:8px;min-width:150px}
+.chip-lbl{color:var(--mut);font-size:11px;display:block;margin-bottom:2px}
+.chip-val{font-weight:700;font-size:16px}
+.chip-pct{font-size:11px;color:var(--mut);margin-left:4px}
+.chip-del{margin-left:auto;background:none;border:none;color:var(--mut);cursor:pointer;font-size:14px;padding:2px 4px;border-radius:4px;transition:color .15s}
+.chip-del:hover{color:var(--red)}
+.chip-empty{color:var(--mut);font-size:12px}
+
+/* LEADERBOARD */
+.leaderboard-wrap{max-width:900px;margin:0 auto;padding:0 20px 36px}
+.lb-card{background:var(--card);border:1px solid var(--bdr);border-radius:16px;overflow:hidden}
+.lb-header{display:grid;grid-template-columns:44px 1fr 90px 90px 80px;gap:0;padding:10px 16px;background:var(--sur2);border-bottom:1px solid var(--bdr);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--mut)}
+.lb-row{display:grid;grid-template-columns:44px 1fr 90px 90px 80px;gap:0;padding:12px 16px;border-bottom:1px solid var(--bdr);align-items:center;transition:background .15s}
+.lb-row:last-child{border-bottom:none}
+.lb-row:hover{background:var(--sur)}
+.lb-row.me{background:rgba(79,142,247,0.06);border-left:3px solid var(--acc)}
+.lb-rank{font-family:'Syne',sans-serif;font-weight:800;font-size:15px}
+.lb-rank.gold{color:#ffd700}
+.lb-rank.silver{color:#c0c0c0}
+.lb-rank.bronze{color:#cd7f32}
+.lb-name{font-weight:600;font-size:14px}
+.lb-name .you-tag{background:rgba(79,142,247,0.15);color:var(--acc);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:6px;letter-spacing:.5px;text-transform:uppercase}
+.lb-paper{font-size:12px;color:var(--mut)}
+.lb-score{font-family:'Syne',sans-serif;font-weight:800;font-size:15px}
+.lb-pct{font-size:12px;font-weight:600;border-radius:6px;padding:3px 8px;text-align:center}
+.lb-pct.hi{background:rgba(34,201,138,.15);color:var(--grn)}
+.lb-pct.mid{background:rgba(255,201,74,.15);color:var(--ylw)}
+.lb-pct.lo{background:rgba(255,92,92,.15);color:var(--red)}
+.lb-empty{text-align:center;padding:32px;color:var(--mut);font-size:13px}
+.lb-syncing{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px;color:var(--mut);font-size:12px;border-top:1px solid var(--bdr)}
+.spin{width:14px;height:14px;border:2px solid var(--bdr);border-top-color:var(--acc);border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* PAT PROMPT */
+.pat-prompt{background:rgba(255,201,74,0.07);border:1px solid rgba(255,201,74,0.2);border-radius:12px;padding:12px 16px;margin-bottom:20px;font-size:12px;color:var(--ylw);display:flex;gap:10px;align-items:flex-start}
+.pat-prompt a{color:var(--acc);text-decoration:none}
+.pat-prompt a:hover{text-decoration:underline}
+
+/* PAPERS GRID */
+.papers-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;max-width:1100px;margin:0 auto;padding:0 20px 50px}
+.pcard{background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:20px 22px;cursor:pointer;transition:transform .2s,border-color .2s,box-shadow .2s;position:relative;overflow:hidden}
+.pcard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--pa,var(--acc));border-radius:16px 16px 0 0;opacity:0;transition:opacity .2s}
+.pcard:hover{transform:translateY(-3px);border-color:var(--acc);box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.pcard:hover::before{opacity:1}
+.ctop{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.cseason{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 9px;border-radius:6px;background:rgba(79,142,247,0.12);color:var(--acc)}
+.cseason.w{background:rgba(162,89,255,0.12);color:var(--acc2)}
+.cyear{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;line-height:1}
+.cqs{color:var(--mut);font-size:12px}
+.bar-wrap{margin-top:12px}
+.bar-bg{height:4px;background:var(--bdr);border-radius:4px;overflow:hidden;margin-bottom:6px}
+.bar-fill{height:100%;border-radius:4px;background:var(--grn);transition:width .4s}
+.bar-fill.mid{background:var(--ylw)}
+.bar-fill.low{background:var(--red)}
+.cscore-txt{font-size:12px;color:var(--mut)}
+.cscore-txt b{color:var(--txt)}
+.cbtn{display:block;width:100%;margin-top:14px;background:var(--acc);color:white;border:none;border-radius:10px;padding:10px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;cursor:pointer;transition:background .15s}
+.cbtn:hover{background:#6aa0ff}
+.cbtn.retake{background:var(--sur2)}
+.cbtn.retake:hover{background:var(--bdr)}
+
+/* QUIZ */
+#quiz{max-width:760px;margin:0 auto;padding:28px 20px 60px}
+.qhdr{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+.qback{background:var(--sur);border:1px solid var(--bdr);color:var(--txt);border-radius:10px;padding:7px 14px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:border-color .15s;white-space:nowrap}
+.qback:hover{border-color:var(--acc);color:var(--acc)}
+.qtitle h2{font-family:'Syne',sans-serif;font-size:17px;font-weight:800}
+.qsub{font-size:12px;color:var(--mut)}
+.prog-row{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.prog-bar{flex:1;height:6px;background:var(--bdr);border-radius:6px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:6px;transition:width .3s}
+.prog-txt{font-size:13px;color:var(--mut);white-space:nowrap}
+.prog-txt b{color:var(--txt)}
+.sec-div{background:var(--sur);border:1px solid var(--bdr);border-radius:10px;padding:9px 15px;margin-bottom:18px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--acc)}
+.qcard{background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:20px 22px;margin-bottom:14px}
+.qnum{font-size:11px;color:var(--mut);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px}
+.qtext{font-size:15px;line-height:1.65;margin-bottom:14px}
+.opts{display:flex;flex-direction:column;gap:7px}
+.opt{display:flex;align-items:flex-start;gap:11px;background:var(--sur);border:1.5px solid var(--bdr);border-radius:10px;padding:10px 13px;cursor:pointer;transition:border-color .15s,background .15s;font-size:14px;line-height:1.5}
+.opt:hover:not(.locked){border-color:var(--acc);background:rgba(79,142,247,0.06)}
+.opt.sel{border-color:var(--acc);background:rgba(79,142,247,0.1)}
+.opt.cor{border-color:var(--grn);background:rgba(34,201,138,0.08)}
+.opt.wrg{border-color:var(--red);background:rgba(255,92,92,0.08)}
+.opt.locked{cursor:default}
+.olbl{min-width:22px;height:22px;border:1.5px solid var(--bdr);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--mut);flex-shrink:0;margin-top:1px;transition:all .15s}
+.opt.sel .olbl{border-color:var(--acc);color:var(--acc);background:rgba(79,142,247,0.15)}
+.opt.cor .olbl{border-color:var(--grn);color:var(--grn);background:rgba(34,201,138,0.15)}
+.opt.wrg .olbl{border-color:var(--red);color:var(--red);background:rgba(255,92,92,0.15)}
+.instant-badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:5px;margin-left:8px;vertical-align:middle}
+.instant-badge.right{background:rgba(34,201,138,.15);color:var(--grn)}
+.instant-badge.wrong{background:rgba(255,92,92,.15);color:var(--red)}
+.qactions{display:flex;gap:12px;margin-top:26px;flex-wrap:wrap}
+.btn-pri{background:var(--acc);color:white;border:none;border-radius:12px;padding:13px 28px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:15px;cursor:pointer;transition:background .15s;flex:1}
+.btn-pri:hover{background:#6aa0ff}
+.btn-sec{background:var(--sur2);color:var(--txt);border:1px solid var(--bdr);border-radius:12px;padding:13px 22px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:15px;cursor:pointer;transition:border-color .15s}
+.btn-sec:hover{border-color:var(--acc)}
+
+/* RESULT */
+#result{max-width:700px;margin:0 auto;padding:36px 20px 80px}
+.res-top{text-align:center;margin-bottom:32px}
+.res-ring{width:160px;height:160px;margin:0 auto 24px;position:relative}
+.res-ring svg{transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:var(--bdr);stroke-width:10}
+.ring-fill{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .9s cubic-bezier(.4,0,.2,1)}
+.ring-lbl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-pct{font-family:'Syne',sans-serif;font-size:34px;font-weight:800}
+.ring-sub{font-size:12px;color:var(--mut)}
+.res-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;margin-bottom:8px}
+.res-desc{color:var(--mut);font-size:14px;margin-bottom:28px;line-height:1.7}
+.res-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
+.sbox{background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:16px;text-align:center}
+.sval{font-family:'Syne',sans-serif;font-size:28px;font-weight:800}
+.slbl{font-size:11px;color:var(--mut);margin-top:4px}
+.sbox.c .sval{color:var(--grn)}
+.sbox.w .sval{color:var(--red)}
+.sbox.s .sval{color:var(--ylw)}
+.sec-breakdown{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:28px}
+.sec-bcard{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px}
+.sec-bname{font-size:11px;color:var(--mut);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px}
+.sec-bmeta{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.sec-bscore{font-family:'Syne',sans-serif;font-size:18px;font-weight:800}
+.sec-bpct{font-size:12px;color:var(--mut)}
+.sec-bbar{height:4px;background:var(--bdr);border-radius:4px;overflow:hidden}
+.sec-bfill{height:100%;border-radius:4px;transition:width .6s .2s}
+.res-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:36px}
+.res-actions .btn-pri{flex:unset;min-width:160px}
+.rev-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:14px}
+.rev-filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.rfbtn{background:var(--sur);border:1px solid var(--bdr);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;color:var(--mut);cursor:pointer;transition:all .15s}
+.rfbtn.active{background:var(--acc);border-color:var(--acc);color:white}
+.rev-card{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px;margin-bottom:9px;font-size:13px;line-height:1.6}
+.rev-card.rc{border-color:rgba(34,201,138,.3)}
+.rev-card.rw{border-color:rgba(255,92,92,.3)}
+.rev-card.rs{border-color:rgba(255,201,74,.3)}
+.rev-q{margin-bottom:7px}
+.rev-ans{font-size:12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ans-c{background:rgba(34,201,138,.15);color:var(--grn);padding:2px 8px;border-radius:5px}
+.ans-w{background:rgba(255,92,92,.15);color:var(--red);padding:2px 8px;border-radius:5px}
+.ans-s{background:rgba(255,201,74,.15);color:var(--ylw);padding:2px 8px;border-radius:5px}
+
+/* PAT SETTINGS MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--bdr);border-radius:20px;padding:28px;max-width:460px;width:100%}
+.modal h3{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;margin-bottom:6px}
+.modal p{color:var(--mut);font-size:13px;margin-bottom:18px;line-height:1.6}
+.modal label{display:block;font-size:12px;font-weight:600;color:var(--mut);margin-bottom:6px}
+.modal input{width:100%;background:var(--sur);border:1.5px solid var(--bdr);border-radius:10px;padding:11px 14px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;margin-bottom:14px;transition:border-color .2s}
+.modal input:focus{border-color:var(--acc)}
+.modal-btns{display:flex;gap:10px}
+.modal-btns button{flex:1;border-radius:10px;padding:11px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;cursor:pointer;border:none}
+.modal-btns .save-btn{background:var(--acc);color:white}
+.modal-btns .cancel-btn{background:var(--sur2);color:var(--txt);border:1px solid var(--bdr)}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--sur2);border:1px solid var(--bdr);color:var(--txt);padding:9px 20px;border-radius:30px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:999}
+.toast.show{opacity:1}
+
+/* settings gear */
+.settings-btn{position:fixed;bottom:20px;right:20px;z-index:50;background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:9px 12px;font-size:16px;cursor:pointer;color:var(--mut);transition:color .15s,border-color .15s}
+.settings-btn:hover{color:var(--txt);border-color:var(--acc)}
+
+@media(max-width:600px){
+  .lb-header,.lb-row{grid-template-columns:36px 1fr 70px 60px}
+  .lb-header :last-child,.lb-row :last-child{display:none}
+  .papers-grid{grid-template-columns:1fr;padding:0 14px 50px}
+  .res-stats{gap:8px}.sval{font-size:22px}
+  .login-box{padding:28px 20px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login" class="screen active">
+  <div class="login-box">
+    <div class="login-logo">📚</div>
+    <h2>IPDC Question Bank</h2>
+    <p>Enter your username to track your scores and appear on the leaderboard.</p>
+    <div class="input-wrap">
+      <input type="text" id="username-input" placeholder="Enter your username" autocomplete="off" maxlength="30">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Continue →</button>
+    <div class="login-err" id="login-err">Please enter a valid username.</div>
+  </div>
+</div>
+
+<!-- HOME SCREEN -->
+<div id="home" class="screen">
+  <div class="hero">
+    <div class="badge">GTU · Subject Code 3160003</div>
+    <h1>IPDC Question Bank</h1>
+    <p>Practice with all past examination papers. Track your scores per paper.</p>
+    <div class="user-bar">
+      <span class="user-chip" id="user-display">👤 user</span>
+      <button class="logout-btn" onclick="doLogout()">Switch User</button>
+    </div>
+  </div>
+
+  <!-- PAT missing notice -->
+  <div class="leaderboard-wrap" id="pat-notice" style="display:none">
+    <div class="pat-prompt">
+      ⚠️ &nbsp;<span>GitHub token not set — scores won't sync to the leaderboard. <a href="#" onclick="openPATModal();return false;">Click here to add your token →</a></span>
+    </div>
+  </div>
+
+  <div style="max-width:900px;margin:0 auto;padding:0 20px 14px"><div class="sec-title" id="my-scores-title">Your Scores</div></div>
+  <div class="score-strip" id="scoreboard"></div>
+
+  <div style="max-width:900px;margin:0 auto;padding:0 20px 14px"><div class="sec-title">🏆 Leaderboard</div></div>
+  <div class="leaderboard-wrap">
+    <div class="lb-card">
+      <div class="lb-header">
+        <div>#</div><div>Name</div><div>Paper</div><div>Score</div><div>%</div>
+      </div>
+      <div id="leaderboard-body"><div class="lb-empty">Loading scores…</div></div>
+      <div class="lb-syncing" id="lb-syncing" style="display:none"><div class="spin"></div> Syncing with GitHub…</div>
+    </div>
+  </div>
+
+  <div style="max-width:1100px;margin:0 auto;padding:0 20px 14px"><div class="sec-title">Select a Paper</div></div>
+  <div class="papers-grid" id="papers-grid"></div>
+</div>
+
+<!-- QUIZ SCREEN -->
+<div id="quiz" class="screen">
+  <div class="qhdr">
+    <button class="qback" onclick="goHome()">← Back</button>
+    <div class="qtitle">
+      <h2 id="quiz-heading"></h2>
+      <div class="qsub" id="quiz-sub"></div>
+    </div>
+  </div>
+  <div class="prog-row">
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+    <div class="prog-txt"><b id="prog-cur">0</b> / <b id="prog-tot">0</b></div>
+  </div>
+  <div id="questions-container"></div>
+  <div class="qactions">
+    <button class="btn-sec" onclick="clearAnswers()">Clear Answers</button>
+    <button class="btn-pri" onclick="submitQuiz()">Submit Quiz</button>
+  </div>
+</div>
+
+<!-- RESULT SCREEN -->
+<div id="result" class="screen">
+  <div class="res-top">
+    <div class="res-ring">
+      <svg viewBox="0 0 160 160" width="160" height="160">
+        <circle class="ring-bg" cx="80" cy="80" r="68"/>
+        <circle class="ring-fill" id="ring-fill" cx="80" cy="80" r="68"/>
+      </svg>
+      <div class="ring-lbl">
+        <div class="ring-pct" id="res-pct">0%</div>
+        <div class="ring-sub">Score</div>
+      </div>
+    </div>
+    <h2 class="res-title" id="res-title"></h2>
+    <p class="res-desc" id="res-desc"></p>
+    <div class="res-stats">
+      <div class="sbox c"><div class="sval" id="res-correct">0</div><div class="slbl">Correct</div></div>
+      <div class="sbox w"><div class="sval" id="res-wrong">0</div><div class="slbl">Wrong</div></div>
+      <div class="sbox s"><div class="sval" id="res-skip">0</div><div class="slbl">Skipped</div></div>
+    </div>
+    <div class="sec-breakdown" id="sec-breakdown"></div>
+    <div class="res-actions">
+      <button class="btn-sec" onclick="goHome()">← All Papers</button>
+      <button class="btn-pri" onclick="retakeQuiz()">Retake Quiz</button>
+    </div>
+  </div>
+  <div class="rev-title">Review Answers</div>
+  <div class="rev-filters">
+    <button class="rfbtn active" onclick="setFilter('all',this)">All</button>
+    <button class="rfbtn" onclick="setFilter('correct',this)">Correct</button>
+    <button class="rfbtn" onclick="setFilter('wrong',this)">Wrong</button>
+    <button class="rfbtn" onclick="setFilter('skip',this)">Skipped</button>
+  </div>
+  <div id="review-container"></div>
+</div>
+
+<!-- PAT Modal -->
+<div class="modal-overlay" id="pat-modal">
+  <div class="modal">
+    <h3>🔑 GitHub Token Setup</h3>
+    <p>To sync scores to GitHub, add a Personal Access Token with <b>repo</b> scope. Your token is stored only in your browser. <a href="https://github.com/settings/tokens/new?scopes=repo&description=IPDC+Quiz" target="_blank" style="color:var(--acc)">Generate one here →</a></p>
+    <label>Personal Access Token</label>
+    <input type="password" id="pat-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+    <div class="modal-btns">
+      <button class="cancel-btn" onclick="closePATModal()">Cancel</button>
+      <button class="save-btn" onclick="savePAT()">Save Token</button>
+    </div>
+  </div>
+</div>
+
+<button class="settings-btn" onclick="openPATModal()" title="GitHub Token Settings">⚙️</button>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ─────────────────────────────────────────────────────
+const OWNER = 'AgentO7';
+const REPO  = 'ipdc-quiz-2';
+const BRANCH = 'main';
+const SCORES_PATH = 'scores.json';
+const ADMIN_USER = 'devpatel1231';
+
+// ── PAPERS DATA ─────────────────────────────────────────────────
+const PAPERS=[{id:'sum2025',year:2025,season:'Summer',date:'06-06-2025',sections:[{name:'Section A – True/False',marks:10,questions:[{q:'The more you visualize your long-term goals, the fewer chances there are of achieving them.',opts:['True','False'],ans:1},{q:'There is no risk of addiction when smoking cigarettes occasionally to please one\'s friends.',opts:['True','False'],ans:1},{q:'Working in a team helps you gain new perspectives.',opts:['True','False'],ans:0},{q:'The biggest role of a team member is to take credit for the team\'s success.',opts:['True','False'],ans:1},{q:'Seva should be performed with the expectation of a reward.',opts:['True','False'],ans:1},{q:'Death can teach us about life.',opts:['True','False'],ans:0},{q:'Whatever happens, happens for the worst.',opts:['True','False'],ans:1},{q:'It is possible for a person to bring change in his/her attitude.',opts:['True','False'],ans:0},{q:'We should always be accountable for our actions and be honest with the people who are depending on us.',opts:['True','False'],ans:0},{q:'Realising our lifespan as finite can allow us to become more productive.',opts:['True','False'],ans:0}]},{name:'Section B – MCQ',marks:30,questions:[{q:'What is the meaning of "begin with the end in mind"?',opts:['You should end the task while remembering the start point','You should envision where you want to be in future and structure your life now to give direction to reach your goal','You should begin the task and later plan to end it depending on your initial progress','You should imagine how you want to begin the task before starting'],ans:1},{q:'"One should analyse oneself continually, introspect and think that ..."',opts:['How can I get people to like me more?','I have enough time to do this task later.','This is still to be done, and what have I come to do, and what is happening?','What is the point of doing anything when one must die one day?'],ans:2},{q:'What is the first step to begin with the end in mind?',opts:['Create good daily routines','Prepare short-term goals','Calculate your risk-outcome ratio','Visualize your long-term goal'],ans:3},{q:'Short term goals should be...?',opts:['vague','not be time-bound','relevant to your long-term goal','hard to achieve'],ans:2},{q:'What does "S" stand for in the "SMART" method?',opts:['Specific','Standard','Superb','Simple'],ans:0},{q:'Complete this sentence: To achieve your short-term goal...',opts:['You should not work in time-limits','Your daily routine should include activities that help to achieve it','Do the same thing that your friends do','You should avoid focussing on your daily habits'],ans:1},{q:'Drug addictions can negatively impact which of the following?',opts:['Health','Wealth','Family','All the above'],ans:3},{q:'Which of the following is the least likely reason for the formation of drug addiction?',opts:['Peer pressure','The search for an escape from stress','Curiosity','The desire to form an addiction'],ans:3},{q:'Which of these methods can help an addict overcome their addictions?',opts:['Firmly decide to give up','Reject assistance','Deny accountability','All the above'],ans:0},{q:'According to the IPDC workbook, how many adult smokers began before the age of 18?',opts:['3/10','5/10','7/10','9/10'],ans:3},{q:'What was the fate of the shining star Devashish Ghosh?',opts:['He is currently working at NASA, even though he had initially declined their offer','He is working for ISRO since he declined NASA\'s offer to serve his country','He is working on aerospace research for Lockheed Martin','He is working at a clothing processing factory in Ahmedabad'],ans:3},{q:'How does the \'cool factor\' play a role in recreational drugs?',opts:['One will borrow money from their family to buy recreational drugs','One will use recreational drugs out of curiosity','One will start to use recreational drugs to improve concentration levels','One will use recreational drugs because of the belief that it improves one\'s social status'],ans:3},{q:'Which one of the following services were NOT provided to the victims of the Gujarat earthquake in Bhuj?',opts:['Postcards','Mobile phones','Psychological Trauma Centre','Last rites for the deceased'],ans:0},{q:'How did Carl Joss describe his experience after performing seva in the Gujarat Earthquake relief camp?',opts:['"The best birthday gift that anyone could have given me"','"It was a very memorable experience for me"','"Tiring but definitely worthwhile"','"It was hard to see the people suffering"'],ans:0},{q:'Which of the following seva did Carl Joss NOT perform during the Gujarat earthquake relief work?',opts:['Cutting vegetables','Serving food','Donating money','Driving the ambulance'],ans:2}]},{name:'Section C – Application',marks:30,questions:[{q:'What is the best way to describe the leadership concept "Leading Without Leading"?',opts:['Great leaders should delegate as much work as possible to free up their time for the most important things.','Great leaders can lead through a good example instead of a more commanding nature.'],ans:1},{q:'What can we learn from Alexander-The-Great\'s quote about keeping hands outside while dying?',opts:['Great people often die unhappy.','Material gain and reputation are not the most important things in life.'],ans:1},{q:'How could Devashish Ghosh have avoided his downfall?',opts:['Devashish should have only used drugs occasionally during his vacation time.','Devashish should not have taken the risk. He should have avoided the use of drugs completely.'],ans:1},{q:'A charitable NGO is building a school for orphans. A volunteer suggests air coolers (+5% fundraising). What would you suggest?',opts:['"It will be worth the extra effort of fundraising so that the students feel more comfortable."','"We should only focus on the basic necessities needed to build the school."'],ans:1},{q:'What is the closest interpretation of "Small things make perfection, but perfection is not a small thing"?',opts:['Try to bring perfection into the small tasks of your day-to-day life. Perfection in small tasks drives our life to perfection.','Perfection is very important for your career. Bring perfection into your important tasks as a student or as a professional.'],ans:0},{q:'Which attribute of a good team player is emphasised in "Teamwork: simply stated, it is less me and more we"?',opts:['A good team player should be able to sacrifice his personal gains for the success of the team','A good team player should be able to change his personality to fit in with the team.'],ans:0},{q:'Rahul wants to be an engineer. He just got into his desired institute. What should he follow?',opts:['Rahul should try to settle down into the new atmosphere, observe what others are doing and follow in their footsteps.','Rahul should define some short-term goals that will help get entry into the company of his choice'],ans:1},{q:'Aniket often gets late to class and rarely submits assignments on time. His new professor hasn\'t noticed. What should Aniket do?',opts:['Aniket can maintain his lifestyle but should also stay aware such that his grades do not suffer as a result.','He should become more punctual in his attendance and submissions.'],ans:1},{q:'Jeff Garcia showed up every day to practice first. Which leadership style does this represent?',opts:['Lead by example','First in, is the first to win'],ans:0},{q:'What leadership style best describes Bill Gates\' quote: "Leaders will be those who empower others"?',opts:['Delegative Leadership','Servant Leadership'],ans:1},{q:'Every morning Steve Jobs asked himself if he would want to do what he\'s about to do today. What explains this?',opts:['Jobs wanted to remind himself of what is most important in his life and to continue working in that direction.','Jobs wanted to focus more on achieving short term benefits instead of making long term investments.'],ans:0},{q:'Mehul is disturbed just by looking at his roommate Raj. What should Mehul do to feel more positive?',opts:['Change rooms and avoid speaking to Raj. That way he cannot ruin his mood.','Try and forgive Raj for his mocking nature. Focus on his positive qualities instead.'],ans:1},{q:'Dhruv has exams in 3 weeks and wants to study and exercise. How should he balance?',opts:['Dhruv should schedule at least 30 minutes of exercising every morning before studying.','Dhruv should commit to exercising only on the days when he finds spare time after completing his studies and other responsibilities.'],ans:0},{q:'Which is the most effective method to become more productive?',opts:['Create and follow a schedule while neglecting everything else.','Find your biggest priorities and ensure they are scheduled and completed.'],ans:1},{q:'Neha (30) is a data scientist earning ₹9L/year for 7 years. When should she start a retirement fund?',opts:['Start investing into a retirement fund straight away to earn more money through compound interest.','For the next 5-7 years, she should keep her money free so she can spend it. She can then start a retirement fund afterwards.'],ans:0}]}]},{id:'win2025',year:2025,season:'Winter',date:'14-11-2025',sections:[{name:'Section A – True/False',marks:10,questions:[{q:'A mid-term financial goal cannot be achieved straight away but should only take a few years to achieve.',opts:['True','False'],ans:0},{q:'Most health professionals say that it is ideal to get 6 hours of sleep every night.',opts:['True','False'],ans:1},{q:'The recommended amount of moderate physical exercise is 100 minutes per week.',opts:['True','False'],ans:1},{q:'Stress is a physical reaction to a mental state.',opts:['True','False'],ans:0},{q:'Seva should be performed with the expectation of a reward.',opts:['True','False'],ans:1},{q:'Death can teach us about life.',opts:['True','False'],ans:0},{q:'Whatever happens, happens for the worst.',opts:['True','False'],ans:1},{q:'It is possible for a person to bring change in his/her attitude.',opts:['True','False'],ans:0},{q:'By completing the small things sincerely, it encourages you to do the big things better.',opts:['True','False'],ans:0},{q:'To become value-based citizens, we must learn asset valuation techniques.',opts:['True','False'],ans:1}]},{name:'Section B – MCQ',marks:30,questions:[{q:'"One should analyse oneself continually, introspect and think that ..."',opts:['How can I get people to like me more?','I have enough time to do this task later.','This is still to be done, and what have I come to do, and what is happening?','What is the point of doing anything when one must die one day?'],ans:2},{q:'Drug addictions can negatively impact which of the following?',opts:['Health','Wealth','Family','All the above'],ans:3},{q:'According to the IPDC workbook, how many adult smokers began before the age of 18?',opts:['3/10','5/10','7/10','9/10'],ans:3},{q:'What does "S" stand for in the "SMART" method?',opts:['Specific','Standard','Superb','Simple'],ans:0},{q:'What was the fate of Devashish Ghosh?',opts:['He is currently working at NASA','He is working for ISRO','He is working for Lockheed Martin','He is working at a clothing processing factory in Ahmedabad'],ans:3},{q:'Which service was NOT provided to Gujarat earthquake victims in Bhuj?',opts:['Postcards','Mobile phones','Psychological Trauma Centre','Last rites for the deceased'],ans:0},{q:'"Performing exercise" best fits into which category?',opts:['Important & Urgent','Important but Not Urgent','Not Important but Urgent','Not Important & Not Urgent'],ans:1},{q:'Which seva did Carl Joss NOT perform during Gujarat earthquake relief work?',opts:['Cutting vegetables','Serving food','Donating money','Driving the ambulance'],ans:2},{q:'Which of the following is a fixed-voluntary cost?',opts:['Rent','Gym membership','Medicine','Food'],ans:1},{q:'What caused Mangesh Mhaskar\'s downfall despite scoring 97%?',opts:['Lack of finance','Illness','A lack of support from his parents','Bad company'],ans:3},{q:'How did Tenzing Norgay climb Mount Everest?',opts:['With unselfish teamwork','With agility and recklessness','By trying to get ahead on his own','With persistent fast speed'],ans:0},{q:'According to Harvard School of Public Health, how much of a portioned plate should be fruits and vegetables?',opts:['15%','25%','40%','50%'],ans:3},{q:'Who supported Mahatma Gandhi as his personal secretary for 25 years?',opts:['Vallabhbhai Patel','Vithalbhai Patel','Mahadev Desai','V. P. Menon'],ans:2},{q:'What is the meaning of "begin with the end in mind"?',opts:['You should end the task while remembering the start point','You should envision where you want to be in future and structure your life now to give direction to reach your goal','You should begin the task and later plan to end it depending on your initial progress','You should imagine how you want to begin the task before starting'],ans:1},{q:'Short term goals should be...?',opts:['vague','not be time-bound','relevant to your long-term goal','hard to achieve'],ans:2}]},{name:'Section C – Application',marks:30,questions:[{q:'Rajesh cleared 12th with good grades but is confused about degree course. What should he do?',opts:['He should seek advice in choosing a course relevant to his prospective career choice.','He should select the course that is most popular with his friends and other students.'],ans:0},{q:'What can we learn from Alexander-The-Great\'s dying quote?',opts:['Great people often die unhappy.','Material gain and reputation are not the most important things in life.'],ans:1},{q:'How could Devashish Ghosh have avoided his downfall?',opts:['He should have only used drugs occasionally during vacation time.','He should not have taken the risk. He should have avoided drugs completely.'],ans:1},{q:'Sanjay has back pain before the finals match. What should he do?',opts:['Do not tell anyone and play the match.','Alert your coach about it, even if that means he may not let you play.'],ans:1},{q:'What is the closest interpretation of "Small things make perfection, but perfection is not a small thing"?',opts:['Try to bring perfection into the small tasks of your day-to-day life.','Perfection is very important for your career. Bring perfection into your important tasks.'],ans:0},{q:'Which attribute of a good team player is emphasised in "Teamwork: it is less me and more we"?',opts:['A good team player should be able to sacrifice his personal gains for the success of the team','A good team player should be able to change his personality to fit in with the team.'],ans:0},{q:'Amit wants to be an engineer. He just got into his desired institute. What should he follow?',opts:['Amit should settle down into the new atmosphere and follow in others\' footsteps.','Amit should define some short-term goals that will help get entry into the company of his choice'],ans:1},{q:'Manan often gets late to class and rarely submits on time. His professor hasn\'t noticed. What should Manan do?',opts:['Manan can maintain his lifestyle but should also stay aware such that his grades do not suffer.','He should become more punctual in his attendance and submissions.'],ans:1},{q:'Neel\'s friend says "there is no harm in trying cigarettes once". Why should Neel decline?',opts:['Smoking is harmful and can become addictive.','Smoking can be an unpleasant experience for beginners.'],ans:0},{q:'What leadership style best describes Bill Gates\' "Leaders will be those who empower others"?',opts:['Delegative Leadership','Servant Leadership'],ans:1},{q:'Steve Jobs asked himself every morning: "would I want to do what I\'m about to do today?" What does this explain?',opts:['Jobs wanted to remind himself of what is most important in his life.','Jobs wanted to focus more on achieving short term benefits.'],ans:0},{q:'Anmol is hiring for his IT team. Which approach is best?',opts:['Make a team with less diversity to help avoid conflicts and confusion.','Make a team with more diversity to increase innovation, different perspectives, and greater acceptance.'],ans:1},{q:'Jatin has exams in 3 weeks and wants to study and exercise. How should he balance?',opts:['Jatin should schedule at least 30 minutes of exercising every morning before studying.','Jatin should commit to exercising only on the days when he finds spare time after completing his studies.'],ans:0},{q:'Which is the most effective method to become more productive?',opts:['Create and follow a schedule while neglecting everything else.','Find your biggest priorities and ensure they are scheduled and completed.'],ans:1},{q:'Anjali has a long-term goal of Civil Services but is struggling to achieve short-term goals. What should she do?',opts:['Anjali should change her long-term goal to something easier','Anjali should create a daily routine that will help her achieve her short-term targets'],ans:1}]}]},{id:'sum2024',year:2024,season:'Summer',date:'01-06-2024',sections:[{name:'Section A – True/False',marks:10,questions:[{q:'The biggest insult in the world is when you lower yourself in your own esteem and in your own eyes.',opts:['True','False'],ans:0},{q:'There is no risk of addiction when one is smoking cigarettes occasionally to please one\'s friends.',opts:['True','False'],ans:1},{q:'Moral values are not universal across the borders of culture, race, religion, economics, politics, etc.',opts:['True','False'],ans:1},{q:'The biggest role of a team member is to take credit for the team\'s success.',opts:['True','False'],ans:1},{q:'Most of today\'s youth are completely drenched in alcohol and completely dry of ambition.',opts:['True','False'],ans:0},{q:'To become value-based citizens, we must learn asset valuation techniques.',opts:['True','False'],ans:1},{q:'By completing the small things sincerely, it encourages you to do the big things better.',opts:['True','False'],ans:0},{q:'The beginning of addiction is always occasional consumption.',opts:['True','False'],ans:0},{q:'Forgiveness can release us from the burden of regret and guilt. It can bring peace to our minds.',opts:['True','False'],ans:0},{q:'If you are internally strong to fight against any bad thing, then and then you can be a winner.',opts:['True','False'],ans:0}]},{name:'Section B – MCQ',marks:30,questions:[{q:'Dr. Bernie Siegel wrote a very famous book called "Love, Medicine & ________".',opts:['Miracles','Obstacles','Opportunities','None of above'],ans:0},{q:'Which of the following is NOT an important component of financial planning?',opts:['Using compound interest','Investing in an orient fund','Calculating your budget','Creating an emergency fund'],ans:1},{q:'What is a potential effect of having good company?',opts:['Increased stress levels','Improved mental well-being','Decreased productivity','Enhanced feelings of isolation'],ans:1},{q:'According to the Harvard School of Public Health, how much of a portioned plate should be filled with healthy proteins?',opts:['15%','25%','40%','50%'],ans:1},{q:'How should one perform seva?',opts:['Keep the right intention','Serve with love','Sacrifice','All of the above'],ans:3},{q:'Asking for forgiveness is an act of ___.',opts:['Courage','Cowardice','Foolishness','Shyness'],ans:0},{q:'Which is NOT one of the powerful thoughts in "Timeless Wisdom for Daily Life"?',opts:['Live every day as if it were your last','Look beyond the body','Whatever happens, happens for the best','When the going gets tough, the tough get going'],ans:3},{q:'What is the name given to the fear of public speaking?',opts:['Glossophobia','Acrophobia','Aerophobia','Zoophobia'],ans:0},{q:'How did Mahadev Desai win the complete trust of Mahatma Gandhi?',opts:['By being loyal','By being sincere in his work','By being punctual in all his duties','All of the above'],ans:3},{q:'If we don\'t serve our country, if we don\'t serve our society, then we are less of being ___',opts:['a human','a citizen','a holy man','a social man'],ans:0},{q:'Pramukh Swami Maharaj reacted to workers\' refusal to continue construction by doing what?',opts:['Lifting tiles','Serving tea','Giving a discourse','Scolding them'],ans:0},{q:'Life is very simple, but what do we insist on making it?',opts:['Easier','Complicated','Luxurious','Nothing'],ans:1},{q:'Which of the following does NOT contribute to being a good team player?',opts:['Sacrifice','Value each team member','Make sure to claim your credit','Learn to change, change to learn'],ans:2},{q:'How did Carl Joss describe his seva experience in the Gujarat earthquake relief camp?',opts:['"The best birthday gift that anyone could have given me"','"It was a very memorable experience for me"','"Tiring but definitely worthwhile"','"It was hard to see the people suffering"'],ans:0},{q:'Which of these is NOT a good way to deal with stress?',opts:['Start drinking','Talk to someone','Accept the challenge and work hard','Meditate'],ans:0}]},{name:'Section C – Application',marks:30,questions:[{q:'Rajesh cleared 12th with good grades but is confused about degree course. What should he do?',opts:['He should seek advice in choosing a course relevant to his prospective career choice.','He should select the course that is most popular with his friends and other students.'],ans:0},{q:'How could Devashish Ghosh have avoided his downfall?',opts:['He should have only used drugs occasionally during vacation time.','He should not have taken the risk. He should have avoided drugs completely.'],ans:1},{q:'A charitable NGO building a school debates air coolers (+5% fundraising). What would you suggest?',opts:['"It will be worth the extra effort of fundraising so that the students feel more comfortable."','"We should only focus on the basic necessities needed to build the school."'],ans:1},{q:'Neel\'s friend says "there is no harm in trying cigarettes once". Why should Neel decline?',opts:['Smoking is harmful and can become addictive.','Smoking can be an unpleasant experience for beginners.'],ans:0},{q:'What is the best way to describe "Leading Without Leading"?',opts:['Great leaders should delegate as much work as possible to free up their time.','Great leaders can lead through a good example instead of a more commanding nature.'],ans:1},{q:'Manan often gets late to class and rarely submits on time. What should Manan do?',opts:['Manan can maintain his lifestyle but should also stay aware that his grades do not suffer.','He should become more punctual in his attendance and submissions.'],ans:1},{q:'Rahul\'s father scolded him in front of friends. What advice would you give Rahul?',opts:['Meet your father and say sorry. A gentle talk may inspire your father to realise he should not have scolded you in front of your friends.','Meet your father and say sorry. Accept your fault and apologise for your improper behaviour. Promise him you will work harder.'],ans:1},{q:'Avinash is disturbed by his roommate Raj. What should Avinash do?',opts:['Change rooms and avoid speaking to Raj.','Try and forgive Raj for his mocking nature. Focus on his positive qualities instead.'],ans:1},{q:'What leadership style best describes Bill Gates\' "Leaders will be those who empower others"?',opts:['Delegative Leadership','Servant Leadership'],ans:1},{q:'Anjali sleeps 7 hours but feels more tired on Mondays. How should she adjust?',opts:['Anjali should try to sleep extra early on Sunday night.','Anjali should try to keep the same sleep schedule on weekdays and weekends.'],ans:1},{q:'Shivani (25) is a data scientist earning ₹7L/year for 4 years. When should she start a retirement fund?',opts:['Start investing into a retirement fund straight away.','For the next 5-7 years, she should keep her money free so she can spend it.'],ans:0},{q:'Anil has to drive 44 minutes to meet client at 11 AM. When should he leave?',opts:['Anil should leave home at 10:15 AM.','Anil should leave home at 10:05 AM, so as to include buffer time into his schedule.'],ans:1},{q:'Your house is damaged in monsoon flooding (₹5 lakh repair). How should you finance it?',opts:['Check insurance, make insurance claim and withdraw balance from your emergency fund.','Check insurance, make insurance claim and borrow the balance from a bank.'],ans:0},{q:'What is the closest interpretation of "Small things make perfection, but perfection is not a small thing"?',opts:['Try to bring perfection into the small tasks of your day-to-day life.','Perfection is very important for your career. Bring perfection into your important tasks.'],ans:0},{q:'Anjali set a long-term goal to join Civil Services but struggles with short-term goals. What should she do?',opts:['Anjali should change her long-term goal to something easier','Anjali should create a daily routine that will help her achieve her short-term targets'],ans:1}]}]},{id:'win2024',year:2024,season:'Winter',date:'17-12-2024',sections:[{name:'Section A – True/False',marks:10,questions:[{q:'Seva should be performed with compassion.',opts:['True','False'],ans:0},{q:'A problem well understood is problem half-solved.',opts:['True','False'],ans:0},{q:'Being generous can make us happier.',opts:['True','False'],ans:0},{q:'The company we keep has little influence on our development and decisions.',opts:['True','False'],ans:1},{q:'Legends create everlasting impressions.',opts:['True','False'],ans:0},{q:'If you are internally strong to fight against any bad thing, then and then you can be a winner.',opts:['True','False'],ans:0},{q:'By completing the small things sincerely, it encourages you to do the big things better.',opts:['True','False'],ans:0},{q:'Only with a sense and a spirit of togetherness, we can mitigate the darkness.',opts:['True','False'],ans:0},{q:'Forgiveness can release us from the burden of regret and guilt. It can bring peace to our minds.',opts:['True','False'],ans:0},{q:'Stress is a physical reaction to a mental state.',opts:['True','False'],ans:0}]},{name:'Section B – MCQ',marks:30,questions:[{q:'What would your face look like if you consume alcohol and tobacco regularly?',opts:['Very bright and energetic','You\'ll have smooth skin','Faster ageing, dullness, and deformation','You always look younger than your age'],ans:2},{q:'Which of the following is NOT an important component of financial planning?',opts:['Using compound interest','Investing in an orient fund','Calculating your budget','Creating an emergency fund'],ans:1},{q:'Which of these is a trait of a good friend?',opts:['Who feeds you poison','Ties you up for fun','Asks you to jump in a well with them','Stops you from having tobacco'],ans:3},{q:'According to the Harvard School of Public Health, how much of a portioned plate should be filled with healthy proteins?',opts:['15%','25%','40%','50%'],ans:1},{q:'The unprecedented earthquake of _______ left Bhuj absolutely shattered.',opts:['26th January 2000, Bhuj','15th August 2000, Ahmedabad','26th January 2001, Bhuj','15th August 2001, Ahmedabad'],ans:2},{q:'Asking for forgiveness is an act of ___.',opts:['Courage','Cowardice','Foolishness','Shyness'],ans:0},{q:'As per the video lecture on stress management, what is the reason for releasing Cortisol?',opts:['Do something nice for someone','Acknowledge someone is doing good for us','Remembering the actual kindness of people.','Trying to keep up and conform to the latest trends'],ans:3},{q:'What was the reply from the sweeper at NASA when President Kennedy asked him about his job?',opts:['"I\'m helping put a man on the moon."','"I keep the NASA premises clean."','"There is no significant contribution from me."','"I clean the instruments to be used for NASA\'s moon mission."'],ans:0},{q:'Drug addictions can negatively impact which of the following?',opts:['Health','Wealth','Family','All the above'],ans:3},{q:'___ is to complete a required task or fulfill an obligation, before or at a previously decided time.',opts:['Loyalty','Sincerity','Punctuality','Honesty'],ans:2},{q:'Who supported Mahatma Gandhi as his personal secretary for 25 years?',opts:['Vallabhbhai Patel','Vithalbhai Patel','Mahadev Desai','V. P. Menon'],ans:2},{q:'What was the first thing Pramukh Swami Maharaj did after being appointed as BAPS president in 1950?',opts:['Take a selfie','Delegate work to people','Wash dishes and utensils','Travel overseas'],ans:2},{q:'Which of the following does NOT contribute to being a good team player?',opts:['Sacrifice','Value each team member','Make sure to claim your credit','Learn to change, change to learn'],ans:2},{q:'What factor allowed Norgay and Hillary to climb Everest while predecessors could not?',opts:['They took permission of the government','They were experienced in mountaineering','They were part of a team that worked selflessly','There was no disappointment in their team'],ans:2},{q:'According to the IPDC workbook, how many adult smokers began before the age of 18?',opts:['3/10','5/10','7/10','9/10'],ans:3}]},{name:'Section C – Application',marks:30,questions:[{q:'Rajesh cleared 12th with good grades but is confused about degree course. What should he do?',opts:['He should seek advice in choosing a course relevant to his prospective career choice.','He should select the course that is most popular with his friends and other students.'],ans:0},{q:'How could Devashish Ghosh have avoided his downfall?',opts:['He should have only used drugs occasionally during vacation time.','He should not have taken the risk. He should have avoided drugs completely.'],ans:1},{q:'A charitable NGO building a school debates air coolers. What would you suggest?',opts:['"It will be worth the extra effort of fundraising so that the students feel more comfortable."','"We should only focus on the basic necessities needed to build the school."'],ans:1},{q:'Neel\'s friend says "there is no harm in trying cigarettes once". Why should Neel decline?',opts:['Smoking is harmful and can become addictive.','Smoking can be an unpleasant experience for beginners.'],ans:0},{q:'What is the best way to describe "Leading Without Leading"?',opts:['Great leaders should delegate as much work as possible.','Great leaders can lead through a good example instead of a more commanding nature.'],ans:1},{q:'Manan often gets late to class and rarely submits on time. What should Manan do?',opts:['Manan can maintain his lifestyle but should also stay aware that his grades do not suffer.','He should become more punctual in his attendance and submissions.'],ans:1},{q:'Steve Jobs asked himself every morning: "would I want to do what I\'m about to do today?" What does this explain?',opts:['Jobs wanted to remind himself of what is most important in his life.','Jobs wanted to focus more on achieving short term benefits.'],ans:0},{q:'Avinash is disturbed by his roommate Raj. What should Avinash do?',opts:['Change rooms and avoid speaking to Raj.','Try and forgive Raj for his mocking nature. Focus on his positive qualities instead.'],ans:1},{q:'Anmol is hiring for his IT team. Which approach is best?',opts:['Make a team with less diversity to help avoid conflicts.','Make a team with more diversity to increase innovation and different perspectives.'],ans:1},{q:'Anjali sleeps 7 hours but feels more tired on Mondays. How should she adjust?',opts:['Anjali should try to sleep extra early on Sunday night.','Anjali should try to keep the same sleep schedule on weekdays and weekends.'],ans:1},{q:'Shivani (25) is a data scientist earning ₹7L/year for 4 years. When should she start a retirement fund?',opts:['Start investing into a retirement fund straight away.','For the next 5-7 years, she should keep her money free so she can spend it.'],ans:0},{q:'Which attribute of a good team player is emphasised in "Teamwork: it is less me and more we"?',opts:['A good team player should be able to sacrifice his personal gains for the success of the team','A good team player should be able to change his personality to fit in with the team.'],ans:0},{q:'Your house is damaged in monsoon flooding. How should you finance the repair?',opts:['Check insurance, make claim and withdraw balance from your emergency fund.','Check insurance, make claim and borrow the balance from a bank.'],ans:0},{q:'What is the closest interpretation of "Small things make perfection, but perfection is not a small thing"?',opts:['Try to bring perfection into the small tasks of your day-to-day life.','Perfection is very important for your career. Bring perfection into your important tasks.'],ans:0},{q:'"Death teaches about life." Which statement best explains the importance of this?',opts:['We should accept that everything has an ending point.','Realizing our life as finite can improve our productivity, clarity, and stability.'],ans:1}]}]},{id:'sum2023',year:2023,season:'Summer',date:'24-07-2023',sections:[{name:'Section A – True/False',marks:10,questions:[{q:'When you live a life without any direction, you will not move far in any one direction.',opts:['True','False'],ans:0},{q:'To achieve your long-term goals, you need to create smaller short-term goals to guide your life in the right direction.',opts:['True','False'],ans:0},{q:'The more you visualize your long-term goals, the fewer chances there are of achieving them.',opts:['True','False'],ans:1},{q:'The biggest role of a team member is to take credit for the team\'s success.',opts:['True','False'],ans:1},{q:'A good team member is willing to sacrifice something for the team.',opts:['True','False'],ans:0},{q:'Legends create everlasting impressions.',opts:['True','False'],ans:0},{q:'Realizing our lifespan as finite can allow us to become more productive.',opts:['True','False'],ans:0},{q:'Forgiveness can release us from the burden of regret and guilt. It can bring peace to our minds.',opts:['True','False'],ans:0},{q:'Asking for forgiveness is an act of a coward.',opts:['True','False'],ans:1},{q:'Stress affects our health.',opts:['True','False'],ans:0}]},{name:'Section B – MCQ',marks:30,questions:[{q:'What does "S" stand for in the "SMART" method?',opts:['Specific','Standard','Superb','Simple'],ans:0},{q:'Complete this sentence: To achieve your short-term goal...',opts:['You should not work in time-limits','Your daily routine should include activities that help to achieve it','Do the same thing that your friends do','You should avoid focussing on your daily habits'],ans:1},{q:'How did Mahadev Desai win the complete trust of Mahatma Gandhi?',opts:['By being loyal','By being sincere in his work','By being punctual in all his duties','All of the above'],ans:3},{q:'How did Walt Disney bring a change in the attitude of his employees at Disneyland?',opts:['He doubled the salary of all the employees.','He gave them a new perspective in which to view their role.','He hired motivational speakers to inspire his employees','He increased paid leaves for the employees.'],ans:1},{q:'According to the Harvard School of Public Health, how much of a portioned plate should be filled with healthy proteins?',opts:['15%','25%','40%','50%'],ans:1},{q:'Which of the following does NOT directly benefit from financial planning?',opts:['Retirement','Purchasing a house','Exam technique','Emergencies'],ans:2},{q:'Purchasing a smartphone is most likely to be which type of financial goal?',opts:['Short-term','Mid-term','Maximization','Strategic'],ans:1},{q:'After forgiving someone, what should we do next?',opts:['Remind them of their mistake','Tell others about their mistake','Forget their mistake and move on','Tell them to write a letter of apology'],ans:2},{q:'What was the reply from the sweeper at NASA when President Kennedy asked him about his job?',opts:['"I\'m helping put a man on the moon."','"I keep the NASA premises clean."','"There is no significant contribution from me."','"I clean the instruments for NASA\'s moon mission."'],ans:0},{q:'Reminding ourselves that "life is finite" — which is NOT one of the benefits?',opts:['It can make our life more meaningful','It can make us more productive','It can increase our lifespan','It can give us clarity'],ans:2},{q:'Drug addictions can negatively impact which of the following?',opts:['Health','Wealth','Family','All the above'],ans:3},{q:'How does the \'cool factor\' play a role in recreational drugs?',opts:['One will borrow money from their family to buy recreational drugs','One will use recreational drugs out of curiosity','One will start to use recreational drugs to improve concentration levels','One will use recreational drugs because of the belief that it improves one\'s social status'],ans:3},{q:'Which of the following is the least likely reason for the formation of drug addiction?',opts:['Peer pressure','The search for an escape from stress','Curiosity','The desire to form an addiction'],ans:3},{q:'Which of these methods can help an addict overcome their addictions?',opts:['Firmly decide to give up','Reject assistance','Deny accountability','All the above'],ans:0},{q:'Asking for forgiveness is an act of ___.',opts:['Courageous','Weak','Foolish','Shy'],ans:0}]},{name:'Section C – Application',marks:30,questions:[{q:'Amit wants to be an engineer. He just got into his desired institute. What should he follow?',opts:['Amit should settle down into the new atmosphere and follow in others\' footsteps.','Amit should define some short-term goals that will help get entry into the company of his choice'],ans:1},{q:'Rajesh cleared 12th with good grades but is confused about degree course. What should he do?',opts:['He should seek advice in choosing a course relevant to his prospective career choice.','He should select the course that is most popular with his friends and other students.'],ans:0},{q:'Anjali has a long-term goal to join Civil Services but struggles with short-term goals. What should she do?',opts:['Anjali should change her long-term goal to something easier','Anjali should create a daily routine that will help her achieve her short-term targets'],ans:1},{q:'Neel\'s friend says "there is no harm in trying cigarettes once". Why should Neel decline?',opts:['Smoking is harmful and can become addictive.','Smoking can be an unpleasant experience for beginners.'],ans:0},{q:'Sejal has financial difficulties and smokes 15 cigarettes daily. Should she stop smoking?',opts:['Yes. Spending money on cigarettes is wasting her money. If she can be strong and give up her addiction, it will be more beneficial in the long term.','No. By trying to stop smoking she will get more stressed, which will only make her situation worse.'],ans:0},{q:'A minister considers whether to attend a community cleanup if media attendance is uncertain. What would you advise?',opts:['Request the organisers to postpone until the media guarantees their attendance.','You should attend the event even if the media does not attend because it is a good cause.'],ans:1},{q:'Sanjay has back pain before the state championship finals. What should he do?',opts:['Do not tell anyone and play the match.','Alert your coach about it, even if that means he may not let you play.'],ans:1},{q:'Manan often gets late to class and rarely submits on time. What should Manan do?',opts:['Manan can maintain his lifestyle but should also stay aware that his grades do not suffer.','He should become more punctual in his attendance and submissions.'],ans:1},{q:'What is the closest interpretation of "Small things make perfection, but perfection is not a small thing"?',opts:['Try to bring perfection into the small tasks of your day-to-day life.','Perfection is very important for your career. Bring perfection into your important tasks.'],ans:0},{q:'Archana is a software engineer who dislikes doing documentation. What should Archana do?',opts:['Complete the documentation work by noting down only the biggest details.','Complete the documentation work sincerely. Follow the organization guidelines to specify the details.'],ans:1},{q:'Steve Jobs asked himself every morning if he would want to do what he\'s about to do. What does this explain?',opts:['Jobs wanted to remind himself of what is most important in his life.','Jobs wanted to focus more on achieving short term benefits.'],ans:0},{q:'"Death teaches about life." Which statement best explains the importance of this?',opts:['We should accept that everything has an ending point.','Realizing our life as finite can improve our productivity, clarity, and stability.'],ans:1},{q:'Anamika was not invited to Aditi\'s birthday. Anamika\'s birthday is coming. What should she do?',opts:['Invite Aditi to make her realise her mistake and apologise.','Invite Aditi to her birthday celebration and bridge the gap in their friendship.'],ans:1},{q:'Avinash is disturbed by his roommate Raj. What should Avinash do?',opts:['Change rooms and avoid speaking to Raj.','Try and forgive Raj for his mocking nature. Focus on his positive qualities instead.'],ans:1},{q:'"Resentment is like drinking poison and then hoping it will kill your enemies." What is the most useful lesson?',opts:['Keeping bitter emotions for those who hurt us will only prove to be self-destructive. So, we should learn to forgive others for our own peace of mind.','Keeping bitter emotions for your enemies is unlikely to inflict harm on them. It is better to act upon it instead.'],ans:0}]}]},{id:'win2023',year:2023,season:'Winter',date:'20-12-2023',sections:[{name:'Section A – True/False',marks:10,questions:[{q:'There is no risk of addiction when smoking cigarettes occasionally to please one\'s friends.',opts:['True','False'],ans:1},{q:'Being generous can make us happier.',opts:['True','False'],ans:0},{q:'Working in a team helps you gain new perspectives.',opts:['True','False'],ans:0},{q:'The biggest role of a team member is to take credit for the team\'s success.',opts:['True','False'],ans:1},{q:'A country without value-based citizens can create an environment of crime and corruption.',opts:['True','False'],ans:0},{q:'To become value-based citizens, we must learn asset valuation techniques.',opts:['True','False'],ans:1},{q:'Being punctual in the workplace is unimportant.',opts:['True','False'],ans:1},{q:'Our eating habits can affect stress levels.',opts:['True','False'],ans:0},{q:'Forgiveness can release us from the burden of regret and guilt. It can bring peace to our minds.',opts:['True','False'],ans:0},{q:'The recommended amount of moderate physical exercise is 100 minutes per week.',opts:['True','False'],ans:1}]},{name:'Section B – MCQ',marks:30,questions:[{q:'Short term goals should be...?',opts:['vague','not be time-bound','relevant to your long-term goal','hard to achieve'],ans:2},{q:'What is the first step to begin with the end in mind?',opts:['Create good daily routines','Prepare short-term goals','Calculate your risk-outcome ratio','Visualize your long-term goal'],ans:3},{q:'What does "S" stand for in the "SMART" method?',opts:['Specific','Standard','Superb','Simple'],ans:0},{q:'What was the fate of the shining star Devashish Ghosh?',opts:['He is currently working at NASA','He is working for ISRO','He is working for Lockheed Martin','He is working at a clothing processing factory in Ahmedabad'],ans:3},{q:'Which of the following is the least likely reason for the formation of drug addiction?',opts:['Peer pressure','The search for an escape from stress','Curiosity','The desire to form an addiction'],ans:3},{q:'According to the IPDC workbook, how many adult smokers began before the age of 18?',opts:['3/10','5/10','7/10','9/10'],ans:3},{q:'How did Carl Joss describe his seva experience in the Gujarat earthquake relief camp?',opts:['"The best birthday gift that anyone could have given me"','"It was a very memorable experience for me"','"Tiring but definitely worthwhile"','"It was hard to see the people suffering"'],ans:0},{q:'Which of the following is NOT a characteristic of a good team player?',opts:['Selflessness','Respect','Half-heartedness','Adaptability'],ans:2},{q:'What factor allowed Norgay and Hillary to climb Everest while predecessors could not?',opts:['They took permission of the government','They were experienced in mountaineering','They were part of a team that worked selflessly','There was no disappointment in their team'],ans:2},{q:'Who supported Mahatma Gandhi as his personal secretary for 25 years?',opts:['Vallabhbhai Patel','Vithalbhai Patel','Mahadev Desai','V. P. Menon'],ans:2},{q:'___ is to complete a required task or fulfil an obligation, before or at a previously decided time.',opts:['Loyalty','Sincerity','Punctuality','Honesty'],ans:2},{q:'According to Harvard School of Public Health, how much of a portioned plate should be fruits and vegetables?',opts:['15%','25%','40%','50%'],ans:3},{q:'After forgiving someone, what should we do next?',opts:['Remind them of their mistake','Tell others about their mistake','Forget their mistake and move on','Tell them to write a letter of apology'],ans:2},{q:'According to the workbook, which is NOT one of the 6 important tips when asking for forgiveness?',opts:['Apologize','Make excuses','Show empathy','Trying to make things right'],ans:1},{q:'Which famous personality received a cancer diagnosis that encouraged them to create iconic technological advances?',opts:['Bill Gates','Steve Jobs','Sundar Pichai','Mark Zuckerberg'],ans:1}]},{name:'Section C – Application',marks:30,questions:[{q:'Your house is damaged in monsoon flooding (₹5 lakh repair). How should you finance it?',opts:['Check insurance, make claim and withdraw balance from your emergency fund.','Check insurance, make claim and borrow the balance from a bank.'],ans:0},{q:'Anjali has a long-term goal to join Civil Services but struggles with short-term goals. What should she do?',opts:['Anjali should change her long-term goal to something easier','Anjali should create a daily routine that will help her achieve her short-term targets'],ans:1},{q:'Neel\'s friend says "there is no harm in trying cigarettes once". Why should Neel decline?',opts:['Smoking is harmful and can become addictive.','Smoking can be an unpleasant experience for beginners.'],ans:0},{q:'Jeff Garcia showed up first to practice every day. Which leadership style best represents this?',opts:['Lead by example','First in, is the first to win'],ans:0},{q:'What is the best way to describe "Leading Without Leading"?',opts:['Great leaders should delegate as much work as possible.','Great leaders can lead through a good example instead of a more commanding nature.'],ans:1},{q:'Manan often gets late to class and rarely submits on time. What should Manan do?',opts:['Manan can maintain his lifestyle but should also stay aware that his grades do not suffer.','He should become more punctual in his attendance and submissions.'],ans:1},{q:'Sanjay has back pain before the state championship finals. What should he do?',opts:['Do not tell anyone and play the match.','Alert your coach about it, even if that means he may not let you play.'],ans:1},{q:'Which attribute of a good team player is emphasised in "Teamwork: it is less me and more we"?',opts:['A good team player should be able to sacrifice his personal gains for the success of the team','A good team player should be able to change his personality to fit in with the team.'],ans:0},{q:'What leadership style best describes Bill Gates\' "Leaders will be those who empower others"?',opts:['Delegative Leadership','Servant Leadership'],ans:1},{q:'"Death teaches about life." Which statement best explains the importance of this?',opts:['We should accept that everything has an ending point.','Realizing our life as finite can improve our productivity, clarity, and stability.'],ans:1},{q:'Shivani (25) is a data scientist earning ₹7L/year for 4 years. When should she start a retirement fund?',opts:['Start investing into a retirement fund straight away.','For the next 5-7 years, she should keep her money free so she can spend it.'],ans:0},{q:'Rahul\'s father scolded him in front of friends. What advice would you give Rahul?',opts:['Meet your father and say sorry. A gentle talk may inspire him to realise he should not have scolded you in front of your friends.','Meet your father and say sorry. Accept your fault and apologise for your improper behaviour. Promise him you will work harder.'],ans:1},{q:'Avinash is disturbed by his roommate Raj. What should Avinash do?',opts:['Change rooms and avoid speaking to Raj.','Try and forgive Raj for his mocking nature. Focus on his positive qualities instead.'],ans:1},{q:'Which is the most effective method to become more productive?',opts:['Create and follow a schedule while neglecting everything else.','Find your biggest priorities and ensure they are scheduled and completed.'],ans:1},{q:'Anil has to drive 44 minutes to meet client at 11 AM. When should he leave?',opts:['Anil should leave home at 10:15 AM.','Anil should leave home at 10:05 AM, so as to include buffer time into his schedule.'],ans:1}]}]},{id:'sum2022',year:2022,season:'Summer',date:'18-06-2022',sections:[{name:'Section A – True/False',marks:10,questions:[{q:'When you live a life without any direction, you will not move far in any one direction.',opts:['True','False'],ans:0},{q:'There is no risk of addiction when one is smoking cigarettes occasionally to please one\'s friends.',opts:['True','False'],ans:1},{q:'Being generous can make us happier.',opts:['True','False'],ans:0},{q:'The biggest role of a team member is to take credit for the team\'s success.',opts:['True','False'],ans:1},{q:'Legends create everlasting impressions.',opts:['True','False'],ans:0},{q:'To become value-based citizens, we must learn asset valuation techniques.',opts:['True','False'],ans:1},{q:'By completing the small things sincerely, it encourages you to do the big things better.',opts:['True','False'],ans:0},{q:'Realising our lifespan as finite can allow us to become more productive.',opts:['True','False'],ans:0},{q:'Forgiveness can release us from the burden of regret and guilt. It can bring peace to our minds.',opts:['True','False'],ans:0},{q:'The company you keep has the potential to make you or break you.',opts:['True','False'],ans:0}]},{name:'Section B – MCQ',marks:30,questions:[{q:'What does "S" stand for in the "SMART" method?',opts:['Specific','Standard','Superb','Simple'],ans:0},{q:'Which of the following is NOT an important component of financial planning?',opts:['Using compound interest','Investing in an orient fund','Calculating your budget','Creating an emergency fund'],ans:1},{q:'How can we create a good environment for ourselves?',opts:['By reading good books','By watching popular shows','By keeping negative thoughts','By eating more food'],ans:0},{q:'According to the Harvard School of Public Health, how much of a portioned plate should be filled with healthy proteins?',opts:['15%','25%','40%','50%'],ans:1},{q:'"Mindless web-browsing" best fits into which category?',opts:['Important & Urgent','Important but Not Urgent','Not Important but Urgent','Not Important & Not Urgent'],ans:3},{q:'Asking for forgiveness is an act of ___.',opts:['Courage','Cowardice','Foolishness','Shyness'],ans:0},{q:'Which is NOT one of the powerful thoughts in "Timeless Wisdom for Daily Life"?',opts:['Live every day as if it were your last','Look beyond the body','Whatever happens, happens for the best','When the going gets tough, the tough get going'],ans:3},{q:'What was the reply from the sweeper at NASA when President Kennedy asked him about his job?',opts:['"I\'m helping put a man on the moon."','"I keep the NASA premises clean."','"There is no significant contribution from me."','"I clean the instruments for NASA\'s moon mission."'],ans:0},{q:'How did Mahadev Desai win the complete trust of Mahatma Gandhi?',opts:['By being loyal','By being sincere in his work','By being punctual in all his duties','All of the above'],ans:3},{q:'___ is to complete a required task or fulfill an obligation, before or at a previously decided time.',opts:['Loyalty','Sincerity','Punctuality','Honesty'],ans:2},{q:'Pramukh Swami Maharaj reacted to workers\' refusal to continue construction by doing what?',opts:['Lifting tiles','Serving tea','Giving a discourse','Scolding them'],ans:0},{q:'What was the first thing Pramukh Swami Maharaj did after being appointed as BAPS president in 1950?',opts:['Take a selfie','Delegate work to people','Wash dishes and utensils','Travel overseas'],ans:2},{q:'Which of the following does NOT contribute to being a good team player?',opts:['Sacrifice','Value each team member','Make sure to claim your credit','Learn to change, change to learn'],ans:2},{q:'How did Carl Joss describe his seva experience in the Gujarat earthquake relief camp?',opts:['"The best birthday gift that anyone could have given me"','"It was a very memorable experience for me"','"Tiring but definitely worthwhile"','"It was hard to see the people suffering"'],ans:0},{q:'Which of these methods can help an addict overcome the addictions?',opts:['Firmly decide to give up','Reject assistance','Deny accountability','All the above'],ans:0}]},{name:'Section C – Application',marks:30,questions:[{q:'Amit wants to be an engineer. He just got into his desired institute. What should he follow?',opts:['Amit should settle down into the new atmosphere and follow in others\' footsteps.','Amit should define some short-term goals that will help get entry into the company of his choice'],ans:1},{q:'How could Devashish Ghosh have avoided his downfall?',opts:['He should have only used drugs occasionally during vacation time.','He should not have taken the risk. He should have avoided drugs completely.'],ans:1},{q:'A charitable NGO building a school debates air coolers. What would you suggest?',opts:['"It will be worth the extra effort of fundraising so that the students feel more comfortable."','"We should only focus on the basic necessities needed to build the school."'],ans:1},{q:'Sanjay has back pain before the state championship finals. What should he do?',opts:['Do not tell anyone and play the match.','Alert your coach about it, even if that means he may not let you play.'],ans:1},{q:'What is the best way to describe "Leading Without Leading"?',opts:['Great leaders should delegate as much work as possible.','Great leaders can lead through a good example instead of a more commanding nature.'],ans:1},{q:'Manan often gets late to class and rarely submits on time. What should Manan do?',opts:['Manan can maintain his lifestyle but should also stay aware that his grades do not suffer.','He should become more punctual in his attendance and submissions.'],ans:1},{q:'Steve Jobs asked himself every morning if he would want to do what he\'s about to do. What does this explain?',opts:['Jobs wanted to remind himself of what is most important in his life.','Jobs wanted to focus more on achieving short term benefits.'],ans:0},{q:'Avinash is disturbed by his roommate Raj. What should Avinash do?',opts:['Change rooms and avoid speaking to Raj.','Try and forgive Raj for his mocking nature. Focus on his positive qualities instead.'],ans:1},{q:'Jatin has exams in 3 weeks and wants to study and exercise. How should he balance?',opts:['Jatin should schedule at least 30 minutes of exercising every morning before studying.','Jatin should commit to exercising only on the days when he finds spare time.'],ans:0},{q:'Anjali sleeps 7 hours but feels more tired on Mondays. How should she adjust?',opts:['Anjali should try to sleep extra early on Sunday night.','Anjali should try to keep the same sleep schedule on weekdays and weekends.'],ans:1},{q:'Shivani (25) is a data scientist earning ₹7L/year for 4 years. When should she start a retirement fund?',opts:['Start investing into a retirement fund straight away.','For the next 5-7 years, she should keep her money free so she can spend it.'],ans:0},{q:'Anil has to drive 44 minutes to meet client at 11 AM. When should he leave?',opts:['Anil should leave home at 10:15 AM.','Anil should leave home at 10:05 AM, so as to include buffer time into his schedule.'],ans:1},{q:'Your house is damaged in monsoon flooding. How should you finance the repair?',opts:['Check insurance, make claim and withdraw balance from your emergency fund.','Check insurance, make claim and borrow the balance from a bank.'],ans:0},{q:'What is the closest interpretation of "Small things make perfection, but perfection is not a small thing"?',opts:['Try to bring perfection into the small tasks of your day-to-day life.','Perfection is very important for your career. Bring perfection into your important tasks.'],ans:0},{q:'What can we learn from Alexander-The-Great\'s dying quote about material gain?',opts:['Great people often die unhappy.','Material gain and reputation are not the most important things in life.'],ans:1}]}]},{id:'win2022',year:2022,season:'Winter',date:'21-12-2022',sections:[{name:'Section A – True/False',marks:10,questions:[{q:'When you live a life without any direction, you will not move far in any one direction.',opts:['True','False'],ans:0},{q:'An aggressive leadership style is generally the most effective.',opts:['True','False'],ans:1},{q:'Clear goals will give our lives a clear direction.',opts:['True','False'],ans:0},{q:'The biggest role of a team member is to take credit for the team\'s success.',opts:['True','False'],ans:1},{q:'Seva should be performed with the expectation of a reward.',opts:['True','False'],ans:1},{q:'Death can teach us about life.',opts:['True','False'],ans:0},{q:'Whatever happens, happens for the worst.',opts:['True','False'],ans:1},{q:'It is possible for a person to bring change in his/her attitude.',opts:['True','False'],ans:0},{q:'Moral values are a universal necessity.',opts:['True','False'],ans:0},{q:'Good character is essential in our personal lives, but not at the workplace.',opts:['True','False'],ans:1}]},{name:'Section B – MCQ',marks:30,questions:[{q:'Which of the below is NOT an effective method for relieving stress?',opts:['Meditation','Sufficient rest','Smoking cigarettes','Exercise'],ans:2},{q:'Which of the following is NOT a characteristic of a good team player?',opts:['Selflessness','Respect','Half-heartedness','Adaptability'],ans:2},{q:'According to the IPDC workbook, how many adult smokers began before the age of 18?',opts:['3/10','5/10','7/10','9/10'],ans:3},{q:'Short term goals should be...?',opts:['vague','not be time-bound','relevant to your long-term goal','hard to achieve'],ans:2},{q:'Which famous personality received a cancer diagnosis that encouraged them to create iconic technological advances?',opts:['Bill Gates','Steve Jobs','Sundar Pichai','Mark Zuckerberg'],ans:1},{q:'What was the first thing Pramukh Swami Maharaj did after being appointed as BAPS president in 1950?',opts:['Take a selfie','Delegate work to people','Wash dishes and utensils','Travel overseas'],ans:2},{q:'"Performing exercise" best fits into which category?',opts:['Important & Urgent','Important but Not Urgent','Not Important but Urgent','Not Important & Not Urgent'],ans:1},{q:'Drug addictions can negatively impact which of the following?',opts:['Health','Wealth','Family','All the above'],ans:3},{q:'Which of the following is a fixed-voluntary cost?',opts:['Rent','Gym membership','Medicine','Food'],ans:1},{q:'What caused Mangesh Mhaskar\'s downfall despite scoring 97%?',opts:['Lack of finance','Illness','A lack of support from his parents','Bad company'],ans:3},{q:'Which service was NOT provided to Gujarat earthquake victims in Bhuj?',opts:['Postcards','Mobile phones','Psychological Trauma Centre','Last rites for the deceased'],ans:0},{q:'According to Harvard School of Public Health, how much of a portioned plate should be fruits and vegetables?',opts:['15%','25%','40%','50%'],ans:3},{q:'How did Carl Joss describe his seva experience in the Gujarat earthquake relief camp?',opts:['"The best birthday gift that anyone could have given me"','"It was a very memorable experience for me"','"Tiring but definitely worthwhile"','"It was hard to see the people suffering"'],ans:0},{q:'What is the meaning of "begin with the end in mind"?',opts:['You should end the task while remembering the start point','You should envision where you want to be in future and structure your life now','You should begin the task and later plan to end it depending on your initial progress','You should imagine how you want to begin the task before starting'],ans:1},{q:'"One should analyse oneself continually, introspect and think that ..."',opts:['How can I get people to like me more?','I have enough time to do this task later.','This is still to be done, and what have I come to do, and what is happening?','What is the point of doing anything when one must die one day?'],ans:2}]},{name:'Section C – Application',marks:30,questions:[{q:'What is the best way to describe "Leading Without Leading"?',opts:['Great leaders should delegate as much work as possible.','Great leaders can lead through a good example instead of a more commanding nature.'],ans:1},{q:'What can we learn from Alexander-The-Great\'s dying quote?',opts:['Great people often die unhappy.','Material gain and reputation are not the most important things in life.'],ans:1},{q:'How could Devashish Ghosh have avoided his downfall?',opts:['He should have only used drugs occasionally during vacation time.','He should not have taken the risk. He should have avoided drugs completely.'],ans:1},{q:'A charitable NGO building a school debates air coolers. What would you suggest?',opts:['"It will be worth the extra effort of fundraising so that the students feel more comfortable."','"We should only focus on the basic necessities needed to build the school."'],ans:1},{q:'What is the closest interpretation of "Small things make perfection, but perfection is not a small thing"?',opts:['Try to bring perfection into the small tasks of your day-to-day life.','Perfection is very important for your career. Bring perfection into your important tasks.'],ans:0},{q:'Which attribute of a good team player is emphasised in "Teamwork: it is less me and more we"?',opts:['A good team player should be able to sacrifice his personal gains for the success of the team','A good team player should be able to change his personality to fit in with the team.'],ans:0},{q:'Amit wants to be an engineer. He just got into his desired institute. What should he follow?',opts:['Amit should settle down into the new atmosphere and follow in others\' footsteps.','Amit should define some short-term goals that will help get entry into the company of his choice'],ans:1},{q:'Manan often gets late to class and rarely submits on time. What should Manan do?',opts:['Manan can maintain his lifestyle but should also stay aware that his grades do not suffer.','He should become more punctual in his attendance and submissions.'],ans:1},{q:'Jeff Garcia showed up first to practice every day. Which leadership style best represents this?',opts:['Lead by example','First in, is the first to win'],ans:0},{q:'What leadership style best describes Bill Gates\' "Leaders will be those who empower others"?',opts:['Delegative Leadership','Servant Leadership'],ans:1},{q:'Steve Jobs asked himself every morning if he would want to do what he\'s about to do. What does this explain?',opts:['Jobs wanted to remind himself of what is most important in his life.','Jobs wanted to focus more on achieving short term benefits.'],ans:0},{q:'Avinash is disturbed by his roommate Raj. What should Avinash do?',opts:['Change rooms and avoid speaking to Raj.','Try and forgive Raj for his mocking nature. Focus on his positive qualities instead.'],ans:1},{q:'Jatin has exams in 3 weeks and wants to study and exercise. How should he balance?',opts:['Jatin should schedule at least 30 minutes of exercising every morning before studying.','Jatin should commit to exercising only on the days when he finds spare time.'],ans:0},{q:'Which is the most effective method to become more productive?',opts:['Create and follow a schedule while neglecting everything else.','Find your biggest priorities and ensure they are scheduled and completed.'],ans:1},{q:'Shivani (25) is a data scientist earning ₹7L/year for 4 years. When should she start a retirement fund?',opts:['Start investing into a retirement fund straight away.','For the next 5-7 years, she should keep her money free so she can spend it.'],ans:0}]}]},{id:'win2021',year:2021,season:'Winter',date:'08-12-2021',sections:[{name:'Section A – True/False',marks:10,questions:[{q:'A good team member is willing to sacrifice something for the team.',opts:['True','False'],ans:0},{q:'Death can teach us about life.',opts:['True','False'],ans:0},{q:'To become value-based citizens, we must learn asset valuation techniques.',opts:['True','False'],ans:1},{q:'A mid-term financial goal cannot be achieved straight away but should only take a few years to achieve.',opts:['True','False'],ans:0},{q:'It is possible for a person to bring change in his/her own attitude.',opts:['True','False'],ans:0},{q:'Seva should be performed with the expectation of a reward.',opts:['True','False'],ans:1},{q:'An aggressive leadership style is generally the most effective.',opts:['True','False'],ans:1},{q:'The recommended amount of moderate physical exercise is 100 minutes per week.',opts:['True','False'],ans:1},{q:'Asking for forgiveness is an act of a coward.',opts:['True','False'],ans:1},{q:'Short term goals should be time-bounded.',opts:['True','False'],ans:0}]},{name:'Section B – MCQ',marks:30,questions:[{q:'What did Anjali Ahuja do every Wednesday?',opts:['Take a nap','Meet with her mentor to review her progress','Serve employees lunch','Evaluate everyone\'s wages'],ans:1},{q:'Which one of the following statements are false?',opts:['Physical exercise can increase creativity','Physical exercise can sharpen memory','Physical exercise can improve brain power','Physical exercise can change the colour of the brain'],ans:3},{q:'How did Raj react to his father when he gave him a Bhagwat Gita instead of the car he asked for?',opts:['He never spoke to his father again','He told his friend to buy him the car instead','He asked for an explanation','He moved to Japan and lived there'],ans:2},{q:'"One should analyse oneself continually, introspect and think that ..."',opts:['How can I get people to like me more?','I have enough time to do this task later.','This is still to be done, and what have I come to do, and what is happening?','What is the point of doing anything, when one has to die one day.'],ans:2},{q:'Pramukh Swami Maharaj reacted to workers\' refusal to continue construction by doing what?',opts:['Lifting tiles','Serving tea','Giving a discourse','Scolding them'],ans:0},{q:'After forgiving someone, what should we do next?',opts:['Remind them of their mistake','Tell others about their mistake','Forget their mistake and move on','Tell them to write a letter of apology'],ans:2},{q:'Which of these methods can help an addict overcome their addictions?',opts:['Firmly decide to give up','Reject assistance','Deny accountability','All the above'],ans:0},{q:'How did Carl Joss describe his seva experience in the Gujarat earthquake relief camp?',opts:['"The best birthday gift that anyone could of given me"','"It was a very memorable experience for me"','"Tiring but definitely worthwhile"','"It was hard to see the people suffering"'],ans:0},{q:'How did Walt Disney bring a change in the attitude of his employees at Disneyland?',opts:['He doubled the salary of all the employees.','He gave them a new perspective in which to view their role.','He hired motivational speakers to inspire to his employees','He increased paid leaves for the employees.'],ans:1},{q:'Which of the following does NOT contribute to being a good team player?',opts:['Sacrifice','Value each team member','Make sure to claim your credit','Learn to change, change to learn'],ans:2},{q:'Purchasing a smartphone is most likely to be which type of financial goal?',opts:['Short-term','Mid-term','Maximization','Strategic'],ans:1},{q:'Which is NOT one of the powerful thoughts in "Timeless Wisdom for Daily Life"?',opts:['Live everyday as if it were your last','Look beyond the body','Whatever happens, happens for the best','When the going gets tough, the tough get going'],ans:3},{q:'What factor allowed Norgay and Hillary to climb Everest while predecessors could not?',opts:['They took permission of the government.','They were experienced in mountaineering.','They were part of a team who worked selflessly','There was no disappointment in their team'],ans:2},{q:'"Performing exercise" best fits into which category?',opts:['Important & Urgent','Important but Not Urgent','Not Important but Urgent','Not Important & Not Urgent'],ans:1},{q:'What caused Mangesh Mhaskar\'s downfall despite scoring 97%?',opts:['Lack of finance','Illness','A lack of support from his parents','Bad company'],ans:3}]},{name:'Section C – Application',marks:30,questions:[{q:'What is the best way to describe "Leading Without Leading"?',opts:['Great leaders should delegate as much work as possible.','Great leaders can lead through a good example instead of a more commanding nature.'],ans:1},{q:'"Resentment is like drinking poison and then hoping it will kill your enemies." – Nelson Mandela. What is the best interpretation?',opts:['Keeping bitter emotions for other people will only prove to be self-destructive for us. So, we should learn to forgive others for our own peace of mind.','Keeping bitter emotions for your enemies is unlikely to inflict harm on them. Plus, it will harm us too. So, we should avoid such feelings as it can be a risk for us.'],ans:0},{q:'"Death teaches about life." Which statement best explains the importance of this quotation?',opts:['We should accept that even good things have to come to an end.','Realizing the ultimate deadline can improve our productivity, clarity, and stability.'],ans:1},{q:'Shikha wants to be an IAS officer but realises she is not working hard enough. What should she do?',opts:['Shikha should visualize her long-term goal clearly and start taking steps towards it by creating short term goals. She should work sincerely towards her graduation.','Shikha should change her long-term goal to something easier.'],ans:0},{q:'Jeff Garcia showed up first to practice every day. Which leadership style best represents this?',opts:['Lead by example','First in, is the first to win'],ans:0},{q:'Your project team made a silly mistake and the professor scolded everyone. You know it was your mistake. What should you do?',opts:['Do not reveal that it was your mistake; but make sure you do not repeat such a mistake in the future.','Accept your mistake and express your genuine regret to the team. It will build trust and strengthen the relations within the team.'],ans:1},{q:'Sejal has financial difficulties and smokes 15 cigarettes daily. Should she stop smoking?',opts:['Yes. Spending money on cigarettes is wasting her money. If she can be strong and give up her addiction, it will be more beneficial in the long term.','No. By trying to stop smoking she will get more stressed. Which will only make her situation worse.'],ans:0},{q:'A charitable NGO building a school debates air coolers (+10% fundraising). What would you suggest?',opts:['"It will be worth the extra effort of fundraising so that the students feel more comfortable."','"We should only focus on the basic necessities needed to build the school."'],ans:1},{q:'What is the closest interpretation of "Small things make perfection, but perfection is not a small thing"?',opts:['Try to bring perfection into the small tasks of your day-to-day life.','Perfection is very important for your career. Bring perfection into your important tasks.'],ans:0},{q:'Smit\'s fashion company has low sales. Rita (intern serving snacks) asks to contribute an idea. What should Smit do?',opts:['Tell Rita it is not appropriate to speak right now. She first needs to get more experience.','Let Rita share her idea. She may have something worthwhile to contribute to the discussion.'],ans:1},{q:'Anjali sleeps 7 hours but feels more tired on Mondays. How should she adjust?',opts:['Anjali should try to sleep extra early on Sunday night.','Anjali should try to keep the same sleep schedule on weekdays and weekends.'],ans:1},{q:'Kunal earns ₹50,000/month and wants to buy a car costing ₹1.8 lakh. Which is the reasonable plan?',opts:['Save ₹40,000 a month for 5 months','Save ₹10,000 a month for 18 months'],ans:1},{q:'Which attribute of a good team player is emphasised in "Teamwork: it is less me and more we"?',opts:['A good team player should be able to sacrifice his personal gains for the success of the team','A good team player should be able to change his personality to fit in with the team.'],ans:0},{q:'Avinash is disturbed by his roommate Raj. What should Avinash do?',opts:['Change rooms and avoid speaking to Raj.','Try and forgive Raj for his mocking nature. Focus on his positive qualities instead.'],ans:1},{q:'Lata is often late to 8 AM team meetings due to sleep habits. What should Lata do?',opts:['She should start her work on time. Build a habit of sleeping early so she can wake up early. It is important to be punctual.','She should try to reach work on time. But her work efficiency is also very important, she needs to have proper sleep. So, it is okay to be late occasionally.'],ans:0}]}]}];
+
+// ── STATE ─────────────────────────────────────────────────────
+let scores={}, curIdx=0, userAns={}, revFilter='all', allReviewQs=[];
+let currentUser='', ghPAT='', remoteScores={};
+let answeredQs = {}; // tracks which questions have been answered (for instant reveal)
+
+// ── HELPERS ───────────────────────────────────────────────────
+function allQs(p){return p.sections.flatMap(s=>s.questions)}
+function totalQs(p){return allQs(p).length}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0)}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+
+// ── LOCAL STORAGE ─────────────────────────────────────────────
+function loadLocal(){
+  try{
+    currentUser=localStorage.getItem('ipdc_user')||'';
+    ghPAT=localStorage.getItem('ipdc_pat')||'';
+    const raw=localStorage.getItem('ipdc_scores_'+currentUser);
+    scores=raw?JSON.parse(raw):{};
+  }catch(e){scores={}}
+}
+function saveLocal(){
+  if(currentUser) localStorage.setItem('ipdc_scores_'+currentUser,JSON.stringify(scores));
+}
+
+// ── GITHUB API ────────────────────────────────────────────────
+const API=`https://api.github.com/repos/${OWNER}/${REPO}/contents/${SCORES_PATH}`;
+
+async function fetchRemoteScores(){
+  try{
+    const r=await fetch(API,{headers:{'Authorization':'token '+ghPAT,'Accept':'application/vnd.github.v3+json'}});
+    if(!r.ok)return null;
+    const d=await r.json();
+    const txt=atob(d.content.replace(/\n/g,''));
+    return{data:JSON.parse(txt),sha:d.sha};
+  }catch(e){return null}
+}
+
+async function pushScores(){
+  if(!ghPAT)return;
+  document.getElementById('lb-syncing').style.display='flex';
+  try{
+    const res=await fetchRemoteScores();
+    const existing=res?res.data:{};
+    const sha=res?res.sha:undefined;
+    // Merge: update this user's scores
+    existing[currentUser]=scores;
+    const content=btoa(unescape(encodeURIComponent(JSON.stringify(existing,null,2))));
+    const body={message:`Update scores for ${currentUser}`,content};
+    if(sha)body.sha=sha;
+    body.branch=BRANCH;
+    const r=await fetch(API,{method:'PUT',headers:{'Authorization':'token '+ghPAT,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(r.ok){remoteScores=existing;renderLeaderboard();showToast('Scores synced ✓');}
+    else showToast('Sync failed — check token');
+  }catch(e){showToast('Sync error');}
+  document.getElementById('lb-syncing').style.display='none';
+}
+
+async function loadRemoteScores(){
+  if(!ghPAT){renderLeaderboard();return;}
+  document.getElementById('lb-syncing').style.display='flex';
+  const res=await fetchRemoteScores();
+  document.getElementById('lb-syncing').style.display='none';
+  if(res){remoteScores=res.data;}
+  else{remoteScores={};}
+  renderLeaderboard();
+}
+
+// ── LOGIN ─────────────────────────────────────────────────────
+function doLogin(){
+  const v=document.getElementById('username-input').value.trim();
+  if(!v){document.getElementById('login-err').style.display='block';return;}
+  currentUser=v.toLowerCase().replace(/\s+/g,'_');
+  localStorage.setItem('ipdc_user',currentUser);
+  loadLocal();
+  initHome();
+}
+document.getElementById('username-input').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+
+function doLogout(){
+  currentUser='';localStorage.removeItem('ipdc_user');
+  showScreen('login');
+  document.getElementById('username-input').value='';
+}
+
+// ── PAT MODAL ─────────────────────────────────────────────────
+function openPATModal(){
+  document.getElementById('pat-input').value=ghPAT||'';
+  document.getElementById('pat-modal').classList.add('open');
+}
+function closePATModal(){document.getElementById('pat-modal').classList.remove('open');}
+function savePAT(){
+  const v=document.getElementById('pat-input').value.trim();
+  ghPAT=v;
+  if(v)localStorage.setItem('ipdc_pat',v);
+  else localStorage.removeItem('ipdc_pat');
+  closePATModal();
+  document.getElementById('pat-notice').style.display='none';
+  showToast('Token saved');
+  loadRemoteScores();
+}
+
+// ── HOME ──────────────────────────────────────────────────────
+function initHome(){
+  document.getElementById('user-display').textContent='👤 '+currentUser;
+  document.getElementById('pat-notice').style.display=ghPAT?'none':'block';
+  renderHome();
+  showScreen('home');
+  loadRemoteScores();
+}
+
+function renderHome(){
+  // My scores strip
+  const isAdmin=currentUser===ADMIN_USER;
+  document.getElementById('my-scores-title').textContent=isAdmin?'All Scores (Admin)':'Your Scores';
+  const hasAny=PAPERS.some(p=>scores[p.id]);
+  const sb=document.getElementById('scoreboard');
+  if(!hasAny){sb.innerHTML='<span class="chip-empty">No scores yet — take a quiz to get started!</span>';}
+  else{
+    sb.innerHTML=PAPERS.filter(p=>scores[p.id]).map(p=>{
+      const sc=scores[p.id],pct=Math.round(sc.correct/sc.total*100);
+      return`<div class="chip"><div><span class="chip-lbl">${p.season} ${p.year}</span><span class="chip-val">${sc.correct}/${sc.total}</span><span class="chip-pct">${pct}%</span></div><button class="chip-del" onclick="delScore('${p.id}')">✕</button></div>`;
+    }).join('');
+  }
+
+  // Papers grid
+  const grid=document.getElementById('papers-grid');
+  grid.innerHTML=PAPERS.map((p,i)=>{
+    const sc=scores[p.id],total=totalQs(p),isSummer=p.season==='Summer';
+    let bar='',btn='';
+    if(sc){
+      const pct=Math.round(sc.correct/sc.total*100),cls=pct>=70?'':pct>=50?'mid':'low';
+      bar=`<div class="bar-wrap"><div class="bar-bg"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div><div class="cscore-txt">Last: <b>${sc.correct}/${sc.total}</b> (${pct}%)</div></div>`;
+      btn=`<button class="cbtn retake" onclick="startQuiz(${i})">Retake ↺</button>`;
+    }else{
+      bar=`<div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:0%"></div></div><div class="cscore-txt" style="color:var(--mut)">Not attempted yet</div></div>`;
+      btn=`<button class="cbtn" onclick="startQuiz(${i})">Start Quiz →</button>`;
+    }
+    return`<div class="pcard" style="--pa:${isSummer?'var(--acc)':'var(--acc2)'}">
+      <div class="ctop"><span class="cseason ${isSummer?'':'w'}">${p.season}</span><span class="cyear">${p.year}</span></div>
+      <div class="cqs">📅 ${p.date} · ${total} Qs · 70 Marks</div>
+      ${bar}${btn}
+    </div>`;
+  }).join('');
+}
+
+function renderLeaderboard(){
+  const isAdmin=currentUser===ADMIN_USER;
+  const body=document.getElementById('leaderboard-body');
+
+  // Build rows: from remoteScores (all users) or only current user
+  let rows=[];
+  const sourceData=Object.keys(remoteScores).length>0?remoteScores:{[currentUser]:scores};
+
+  for(const [uname,uScores] of Object.entries(sourceData)){
+    // If not admin, only show own scores
+    if(!isAdmin && uname!==currentUser) continue;
+    for(const [pid,sc] of Object.entries(uScores)){
+      const paper=PAPERS.find(p=>p.id===pid);
+      if(!paper||!sc.total)continue;
+      const pct=Math.round(sc.correct/sc.total*100);
+      rows.push({uname,paper,sc,pct});
+    }
+  }
+
+  // If no remote data but user has local scores, show those
+  if(rows.length===0 && Object.keys(scores).length>0){
+    for(const [pid,sc] of Object.entries(scores)){
+      const paper=PAPERS.find(p=>p.id===pid);
+      if(!paper||!sc.total)continue;
+      const pct=Math.round(sc.correct/sc.total*100);
+      rows.push({uname:currentUser,paper,sc,pct});
+    }
+  }
+
+  if(!rows.length){body.innerHTML='<div class="lb-empty">No scores yet. Complete a quiz to appear here!</div>';return;}
+
+  // Sort by % desc then score desc
+  rows.sort((a,b)=>b.pct-a.pct||(b.sc.correct-a.sc.correct));
+
+  const rankClass=['gold','silver','bronze'];
+  body.innerHTML=rows.map((row,i)=>{
+    const isMe=row.uname===currentUser;
+    const pctCls=row.pct>=70?'hi':row.pct>=50?'mid':'lo';
+    const rankLbl=i<3?`<span class="lb-rank ${rankClass[i]}">${['🥇','🥈','🥉'][i]}</span>`:`<span class="lb-rank">${i+1}</span>`;
+    const youTag=isMe?'<span class="you-tag">You</span>':'';
+    return`<div class="lb-row ${isMe?'me':''}">
+      ${rankLbl}
+      <div class="lb-name">${row.uname}${youTag}</div>
+      <div class="lb-paper">${row.paper.season} '${String(row.paper.year).slice(2)}</div>
+      <div class="lb-score">${row.sc.correct}/${row.sc.total}</div>
+      <div class="lb-pct ${pctCls}">${row.pct}%</div>
+    </div>`;
+  }).join('');
+}
+
+function delScore(id){
+  delete scores[id];saveLocal();
+  renderHome();
+  renderLeaderboard();
+  showToast('Score deleted');
+  if(ghPAT) pushScores();
+}
+
+// ── QUIZ ──────────────────────────────────────────────────────
+function startQuiz(idx){
+  curIdx=idx;userAns={};answeredQs={};
+  const p=PAPERS[idx];
+  document.getElementById('quiz-heading').textContent=`IPDC ${p.season} ${p.year}`;
+  document.getElementById('quiz-sub').textContent=`${p.date} · ${totalQs(p)} Questions · 70 Marks`;
+  const con=document.getElementById('questions-container');
+  con.innerHTML='';
+  let n=0;
+  p.sections.forEach(sec=>{
+    con.innerHTML+=`<div class="sec-div">${sec.name} · ${sec.marks} Marks</div>`;
+    sec.questions.forEach(q=>{
+      const lbls=q.opts.length===2?['A','B']:['A','B','C','D'];
+      const optsHtml=q.opts.map((o,oi)=>`<div class="opt" id="opt-${n}-${oi}" onclick="selOpt(${n},${oi},${q.opts.length},${q.ans})"><span class="olbl">${lbls[oi]}</span><span>${o}</span></div>`).join('');
+      con.innerHTML+=`<div class="qcard"><div class="qnum">Q ${n+1} of ${totalQs(p)}</div><div class="qtext">${q.q}</div><div class="opts">${optsHtml}</div></div>`;
+      n++;
+    });
+  });
+  updProg();showScreen('quiz');
+}
+
+function selOpt(n,oi,numOpts,correctAns){
+  // Prevent re-answering if already answered (instant reveal mode)
+  if(answeredQs[n]!==undefined)return;
+
+  // Deselect all
+  for(let i=0;i<numOpts;i++){const e=document.getElementById(`opt-${n}-${i}`);if(e){e.classList.remove('sel');e.classList.add('locked');}}
+
+  userAns[n]=oi;
+  answeredQs[n]=oi;
+
+  // Mark selected
+  const selEl=document.getElementById(`opt-${n}-${oi}`);
+  if(selEl) selEl.classList.add('sel');
+
+  // Instant reveal
+  const isCorrect=oi===correctAns;
+  const selEl2=document.getElementById(`opt-${n}-${oi}`);
+  const corEl=document.getElementById(`opt-${n}-${correctAns}`);
+
+  if(isCorrect){
+    if(selEl2){selEl2.classList.remove('sel');selEl2.classList.add('cor');}
+  } else {
+    if(selEl2){selEl2.classList.remove('sel');selEl2.classList.add('wrg');}
+    if(corEl){corEl.classList.add('cor');}
+  }
+
+  // Lock all options for this question
+  for(let i=0;i<numOpts;i++){
+    const e=document.getElementById(`opt-${n}-${i}`);
+    if(e)e.classList.add('locked');
+  }
+
+  updProg();
+}
+
+function updProg(){
+  const total=totalQs(PAPERS[curIdx]),ans=Object.keys(userAns).length;
+  document.getElementById('prog-cur').textContent=ans;
+  document.getElementById('prog-tot').textContent=total;
+  document.getElementById('prog-fill').style.width=(ans/total*100)+'%';
+}
+
+function clearAnswers(){
+  userAns={};answeredQs={};
+  const p=PAPERS[curIdx];
+  allQs(p).forEach((q,i)=>{
+    const numOpts=q.opts.length;
+    for(let oi=0;oi<numOpts;oi++){
+      const e=document.getElementById(`opt-${i}-${oi}`);
+      if(e){e.classList.remove('sel','cor','wrg','locked');}
+    }
+  });
+  updProg();showToast('Answers cleared');
+}
+
+function submitQuiz(){
+  const p=PAPERS[curIdx],qs=allQs(p);
+  let correct=0,wrong=0,skip=0;
+  qs.forEach((q,i)=>{
+    const c=userAns[i];
+    if(c===undefined)skip++;
+    else if(c===q.ans)correct++;
+    else wrong++;
+  });
+  scores[p.id]={correct,wrong,skip,total:qs.length};
+  saveLocal();
+  if(ghPAT) pushScores();
+  buildResult(correct,wrong,skip,qs,p);
+  showScreen('result');
+  animRing(correct,qs.length);
+}
+
+function buildResult(correct,wrong,skip,qs,p){
+  const total=qs.length,pct=Math.round(correct/total*100);
+  const color=pct>=70?'var(--grn)':pct>=50?'var(--ylw)':'var(--red)';
+  document.getElementById('res-pct').textContent=pct+'%';
+  document.getElementById('res-pct').style.color=color;
+  document.getElementById('res-correct').textContent=correct;
+  document.getElementById('res-wrong').textContent=wrong;
+  document.getElementById('res-skip').textContent=skip;
+
+  const titles=pct>=85?['Excellent! 🎉','Outstanding performance! Keep it up.']:
+               pct>=70?['Well Done! ✅','You passed with a good score.']:
+               pct>=50?['Keep Practicing 📚','You\'re getting there — review and retry!']:
+               ['Need More Revision 📖','Don\'t give up! Study the answers below.'];
+  document.getElementById('res-title').textContent=titles[0];
+  document.getElementById('res-desc').textContent=`${titles[1]} — ${p.season} ${p.year} · ${correct} correct, ${wrong} wrong, ${skip} skipped out of ${total} questions.`;
+
+  let qOffset=0;
+  const bd=document.getElementById('sec-breakdown');
+  bd.innerHTML=p.sections.map(sec=>{
+    let sc=0,tot=sec.questions.length;
+    sec.questions.forEach((q,i)=>{const c=userAns[qOffset+i];if(c===q.ans)sc++;});
+    const spct=Math.round(sc/tot*100);
+    const fcls=spct>=70?'var(--grn)':spct>=50?'var(--ylw)':'var(--red)';
+    const shortName=sec.name.replace('Section ','').split('–')[0].trim();
+    qOffset+=tot;
+    return`<div class="sec-bcard">
+      <div class="sec-bname">${shortName}</div>
+      <div class="sec-bmeta"><span class="sec-bscore" style="color:${fcls}">${sc}/${tot}</span><span class="sec-bpct">${spct}%</span></div>
+      <div class="sec-bbar"><div class="sec-bfill" style="width:${spct}%;background:${fcls}"></div></div>
+    </div>`;
+  }).join('');
+
+  allReviewQs=qs.map((q,i)=>{
+    const c=userAns[i];
+    let type,html;
+    if(c===undefined){type='skip';html='<span class="ans-s">Skipped</span>';}
+    else if(c===q.ans){type='correct';html=`<span class="ans-c">✓ ${q.opts[q.ans]}</span>`;}
+    else{type='wrong';html=`<span class="ans-w">✗ Your answer: ${q.opts[c]}</span><span class="ans-c">✓ Correct: ${q.opts[q.ans]}</span>`;}
+    return{q,i,type,html};
+  });
+  revFilter='all';
+  document.querySelectorAll('.rfbtn').forEach((b,i)=>{b.classList.toggle('active',i===0)});
+  renderReview();
+}
+
+function animRing(correct,total){
+  const pct=Math.round(correct/total*100),r=68,circ=2*Math.PI*r;
+  const fill=document.getElementById('ring-fill');
+  const color=pct>=70?'#22c98a':pct>=50?'#ffc94a':'#ff5c5c';
+  fill.setAttribute('stroke',color);
+  fill.setAttribute('stroke-dasharray',circ);
+  fill.setAttribute('stroke-dashoffset',circ);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{fill.setAttribute('stroke-dashoffset',circ*(1-pct/100));}));
+}
+
+function setFilter(f,btn){
+  revFilter=f;
+  document.querySelectorAll('.rfbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderReview();
+}
+
+function renderReview(){
+  const con=document.getElementById('review-container');
+  const filtered=revFilter==='all'?allReviewQs:allReviewQs.filter(x=>x.type===revFilter);
+  if(!filtered.length){con.innerHTML=`<div style="text-align:center;padding:24px;color:var(--mut);font-size:14px">No ${revFilter} answers.</div>`;return;}
+  const cls={correct:'rc',wrong:'rw',skip:'rs'};
+  con.innerHTML=filtered.map(({q,i,type,html})=>`
+    <div class="rev-card ${cls[type]}">
+      <div class="rev-q"><b>Q${i+1}.</b> ${q.q}</div>
+      <div class="rev-ans">${html}</div>
+    </div>`).join('');
+}
+
+function retakeQuiz(){startQuiz(curIdx)}
+function goHome(){renderHome();renderLeaderboard();showScreen('home')}
+
+// ── INIT ──────────────────────────────────────────────────────
+(function init(){
+  ghPAT=localStorage.getItem('ipdc_pat')||'';
+  const savedUser=localStorage.getItem('ipdc_user');
+  if(savedUser){
+    currentUser=savedUser;
+    loadLocal();
+    initHome();
+  } else {
+    showScreen('login');
+  }
+})();
+</script>
+</body>
+</html>
